@@ -4,6 +4,7 @@ import RegisterPage from "../pages/RegisterPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import HomePage from "../pages/HomePage";
 export function AppRoutes() {
   return (
     <BrowserRouter>
@@ -13,7 +14,7 @@ export function AppRoutes() {
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<h1>Home - Borala</h1>} />
+          <Route path="/" element={<HomePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

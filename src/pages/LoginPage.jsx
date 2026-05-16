@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -26,24 +28,28 @@ export default function LoginPage() {
     <main>
       <h1>Entrar no Borala</h1>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Insira o e-mail</label>
-        <input
-          type="email"
+        <Input
           id="email"
+          label="E-mail"
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <label htmlFor="password">Insira a senha</label>
-        <input
-          type="password"
+
+        <Input
           id="password"
+          label="Senha"
+          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Entrar</button>
-        <button>
-          a<Link to="/register"></Link>
-        </button>
+
+        <Button type="submit" text="Entrar" />
+
+        <div>
+          <Link to="/register">Não tem conta? Criar agora</Link>
+          <Link to="/forgot">Esqueci minha senha</Link>
+        </div>
       </form>
     </main>
   );

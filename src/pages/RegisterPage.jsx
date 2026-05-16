@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -13,6 +15,8 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const telefoneLimpo = phone.replace(/\D/g, "");
+
       const response = await api("/users", {
         method: "POST",
         body: JSON.stringify({
@@ -20,7 +24,7 @@ export default function RegisterPage() {
           email: email,
           password: password,
           birth_date: birthDate,
-          phone: Number(phone),
+          phone: Number(telefoneLimpo),
         }),
       });
       console.log("Sucesso:", response);
@@ -34,47 +38,51 @@ export default function RegisterPage() {
     <main>
       <h1>Criar Conta</h1>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="name">Seu nome</label>
-        <input
-          type="text"
+        <Input
           id="name"
+          label="Seu nome"
+          type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
-        <label htmlFor="email">Seu e-mail</label>
-        <input
-          type="email"
+        <Input
           id="email"
+          label="Seu e-mail"
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <label htmlFor="phone">Seu telefone</label>
-        <input
-          type="tel"
+        <Input
           id="phone"
+          label="Seu telefone"
+          type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
 
-        <label htmlFor="birthDate">Data de nascimento</label>
-        <input
-          type="date"
+        <Input
           id="birthDate"
+          label="Data de nascimento"
+          type="date"
           value={birthDate}
           onChange={(e) => setBirthDate(e.target.value)}
         />
 
-        <label htmlFor="password">Sua senha</label>
-        <input
-          type="password"
+        <Input
           id="password"
+          label="Sua senha"
+          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit">Registrar</button>
+        <Button type="submit" text="Registrar" />
+
+        <div>
+          <Link to="/login">Já tem uma conta? Entrar</Link>
+        </div>
       </form>
     </main>
   );

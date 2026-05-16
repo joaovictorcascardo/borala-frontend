@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { api } from "../services/api";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -38,23 +40,23 @@ export default function ResetPasswordPage() {
     <main>
       <h1>Criar Nova Senha</h1>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="password">Nova Senha</label>
-        <input
-          type="password"
+        <Input
           id="password"
+          label="Nova Senha"
+          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <label htmlFor="passwordConfirmation">Confirmar Nova Senha</label>
-        <input
-          type="password"
+        <Input
           id="passwordConfirmation"
+          label="Confirmar Nova Senha"
+          type="password"
           value={passwordConfirmation}
           onChange={(e) => setPasswordConfirmation(e.target.value)}
         />
 
-        <button type="submit">Salvar nova senha</button>
+        <Button type="submit" text="Salvar nova senha" />
       </form>
     </main>
   );

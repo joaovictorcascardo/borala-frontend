@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -21,20 +23,24 @@ export default function ForgotPasswordPage() {
       alert(error.message);
     }
   };
+
   return (
     <main>
       <h1>Recuperar Senha</h1>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Seu email</label>
-        <input
-          type="email"
+        <Input
           id="email"
+          label="Seu email"
+          type="email"
           value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
+          onChange={(e) => setEmail(e.target.value)}
         />
-        <button type="submit">Enviar codigo</button>
+
+        <Button type="submit" text="Enviar codigo" />
+
+        <div>
+          <Link to="/login">Lembrou da senha? Voltar ao Login</Link>
+        </div>
       </form>
     </main>
   );

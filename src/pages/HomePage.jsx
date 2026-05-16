@@ -8,7 +8,7 @@ export default function HomePage() {
     return savedUser ? JSON.parse(savedUser) : null;
   });
   useEffect(() => {
-    const procurarDados = async () => {
+    const fetchUserData = async () => {
       try {
         const response = await api("/users/me");
         setUserData(response);
@@ -21,7 +21,7 @@ export default function HomePage() {
       }
     };
 
-    procurarDados();
+    fetchUserData();
   }, [navigate]);
 
   const handleLogout = () => {

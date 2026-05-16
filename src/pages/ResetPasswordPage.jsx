@@ -17,6 +17,7 @@ export default function ResetPasswordPage() {
 
     if (password !== passwordConfirmation) {
       alert("As senhas não coincidem!");
+      return;
     }
 
     try {

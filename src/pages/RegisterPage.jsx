@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const telefoneLimpo = phone.replace(/\D/g, "");
+      const cleanPhone = phone.replace(/\D/g, "");
 
       const response = await api("/users", {
         method: "POST",
@@ -24,7 +24,7 @@ export default function RegisterPage() {
           email: email,
           password: password,
           birth_date: birthDate,
-          phone: Number(telefoneLimpo),
+          phone: Number(cleanPhone),
         }),
       });
       console.log("Sucesso:", response);

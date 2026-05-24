@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 
@@ -163,10 +163,16 @@ function TravelIllustration() {
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  if (localStorage.getItem("@Borala:token")) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       const response = await api("/authenticator/sessions", {
         method: "POST",
@@ -174,8 +180,8 @@ export default function LoginPage() {
       });
       localStorage.setItem("@Borala:token", response.token);
       navigate("/");
-    } catch (error) {
-      alert(error.message);
+    } catch (err) {
+      setError(err.message || "E-mail ou senha inválidos.");
     }
   };
 
@@ -216,6 +222,11 @@ export default function LoginPage() {
             <p className="text-slate-500 text-sm mb-8">Entre com suas credenciais para continuar</p>
 
             <form onSubmit={handleSubmit}>
+              {error && (
+                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
               <Input
                 id="email"
                 label="E-mail"

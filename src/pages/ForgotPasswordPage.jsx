@@ -1,31 +1,31 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       await api("/authenticator/forgot-password", {
         method: "POST",
         body: JSON.stringify({ email }),
       });
-      alert("Instruções de recuperação enviadas para o seu e-mail!");
-      navigate("/login");
-    } catch (error) {
-      alert(error.message);
+      setSent(true);
+    } catch (err) {
+      setError(err.message || "Não foi possível enviar o e-mail. Tente novamente.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -47,16 +47,27 @@ export default function ForgotPasswordPage() {
             Informe seu e-mail e enviaremos as instruções de recuperação
           </p>
 
-          <form onSubmit={handleSubmit}>
-            <Input
-              id="email"
-              label="Seu e-mail"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Button type="submit" text="Enviar instruções" />
-          </form>
+          {sent ? (
+            <div className="px-4 py-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm text-center">
+              Instruções enviadas! Verifique sua caixa de entrada.
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              {error && (
+                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+              <Input
+                id="email"
+                label="Seu e-mail"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button type="submit" text="Enviar instruções" />
+            </form>
+          )}
         </div>
 
         <p className="text-center text-sm text-slate-500 mt-6">

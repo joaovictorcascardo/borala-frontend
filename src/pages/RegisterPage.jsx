@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 
@@ -10,10 +10,16 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  if (localStorage.getItem("@Borala:token")) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       const cleanPhone = phone.replace(/\D/g, "");
       await api("/users", {
@@ -27,8 +33,8 @@ export default function RegisterPage() {
         }),
       });
       navigate("/login");
-    } catch (error) {
-      alert(error.message);
+    } catch (err) {
+      setError(err.message || "Erro ao criar conta. Tente novamente.");
     }
   };
 
@@ -50,6 +56,11 @@ export default function RegisterPage() {
           <p className="text-slate-500 text-sm mb-6">Preencha seus dados para se cadastrar</p>
 
           <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                {error}
+              </div>
+            )}
             <Input
               id="name"
               label="Seu nome"

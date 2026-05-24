@@ -46,7 +46,8 @@ export default function ProfilePage() {
 
     try {
       const token = localStorage.getItem("@Borala:token");
-      const response = await fetch("http://localhost:3333/users/me/avatar", {
+      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3333";
+      const response = await fetch(`${baseURL}/users/me/avatar`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

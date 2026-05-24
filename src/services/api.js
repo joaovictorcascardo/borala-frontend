@@ -1,4 +1,4 @@
-const baseURL = "http://localhost:3333";
+const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3333";
 
 export async function api(endpoint, options = {}) {
   const token = localStorage.getItem("@Borala:token");

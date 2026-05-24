@@ -14,9 +14,9 @@ export function AppRoutes() {
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-
+ <Route path="/profile" element={<ProfilePage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/profile" element={<ProfilePage />} />
+         
           <Route path="/" element={<HomePage />} />
         </Route>
       </Routes>

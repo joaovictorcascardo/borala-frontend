@@ -1,1 +1,97 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-deeper: #4338ca;
+  --color-primary-light: #eff6ff;
+  --color-primary-muted: #dbeafe;
+
+  --color-surface: #ffffff;
+  --color-page: #f8fafc;
+
+  --color-heading: #1e293b;
+  --color-body: #334155;
+  --color-muted: #64748b;
+  --color-subtle: #94a3b8;
+
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+
+  --color-success: #059669;
+  --color-success-bg: #ecfdf5;
+  --color-success-border: #a7f3d0;
+
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-danger-border: #fecaca;
+
+  --radius-card: 1rem;
+  --radius-input: 0.75rem;
+
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-card-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+  --shadow-card-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+  --shadow-input: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+@layer components {
+  .card {
+    @apply bg-surface rounded-card border border-border-light shadow-card;
+  }
+
+  .card-elevated {
+    @apply bg-surface rounded-card border border-border-light shadow-card-lg;
+  }
+
+  .card-auth {
+    @apply bg-surface rounded-card border border-border-light shadow-card-xl p-8;
+  }
+
+  .input-field {
+    @apply w-full px-3.5 py-2.5 rounded-input border border-border bg-surface text-heading
+           shadow-input focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+           transition-all duration-200 placeholder:text-subtle;
+  }
+
+  .btn-primary {
+    @apply w-full bg-primary hover:bg-primary-dark active:bg-primary-deeper text-white font-semibold
+           py-2.5 px-4 rounded-input shadow-input hover:shadow-card
+           transition-all duration-200 cursor-pointer
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply w-full bg-surface hover:bg-page text-body border border-border font-semibold
+           py-2.5 px-4 rounded-input shadow-input hover:shadow-card
+           transition-all duration-200 cursor-pointer
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply w-full bg-danger-bg hover:bg-red-100 text-danger border border-danger-border font-semibold
+           py-2.5 px-4 rounded-input transition-all duration-200 cursor-pointer
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .page-layout {
+    @apply min-h-screen bg-page;
+  }
+
+  .auth-layout {
+    @apply min-h-screen flex items-center justify-center p-4;
+    background: linear-gradient(to bottom right, var(--color-primary-light), var(--color-surface), var(--color-page));
+  }
+
+  .section-label {
+    @apply text-xs font-semibold text-subtle uppercase tracking-wider;
+  }
+
+  .feedback-success {
+    @apply mb-4 px-4 py-3 bg-success-bg border border-success-border rounded-card text-success text-sm;
+  }
+
+  .feedback-error {
+    @apply mb-4 px-4 py-3 bg-danger-bg border border-danger-border rounded-card text-danger text-sm;
+  }
+}

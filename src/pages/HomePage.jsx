@@ -24,6 +24,9 @@ export default function HomePage() {
     fetchUserData();
   }, [navigate]);
 
+  const goToProfile = () => {
+    navigate("/profile");
+  };
   const handleLogout = () => {
     localStorage.removeItem("@Borala:user");
     localStorage.removeItem("@Borala:token");
@@ -36,6 +39,7 @@ export default function HomePage() {
         <p>Bora pra onde hoje?</p>
       </div>
       <button onClick={handleLogout}>Sair</button>
+      <button onClick={goToProfile}>Ver Perfil</button>
     </div>
   );
 }

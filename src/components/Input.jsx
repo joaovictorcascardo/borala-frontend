@@ -9,7 +9,7 @@ export function Input({ label, type, id, value, onChange }) {
         id={id}
         value={value}
         onChange={onChange}
-        className="input-field"
+        className="form-input"
       />
     </div>
   );

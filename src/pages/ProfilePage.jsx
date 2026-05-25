@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { swal } from "../lib/swal";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -14,8 +15,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -27,13 +26,14 @@ export default function ProfilePage() {
         setBio(response.bio || "");
         setAvatarUrl(response.profile_picture_url || null);
       } catch {
-        setError("Não foi possível carregar os dados do perfil.");
+        await swal.error("Não foi possível carregar os dados do perfil.", "Erro ao carregar");
+        navigate("/");
       } finally {
         setLoading(false);
       }
     };
     fetchUserData();
-  }, []);
+  }, [navigate]);
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -42,7 +42,6 @@ export default function ProfilePage() {
     const formData = new FormData();
     formData.append("file", file);
     setUploadingAvatar(true);
-    setError("");
 
     try {
       const token = localStorage.getItem("@Borala:token");
@@ -58,9 +57,9 @@ export default function ProfilePage() {
       }
       const updated = await response.json();
       setAvatarUrl(updated.profile_picture_url);
-      setSuccess("Avatar atualizado com sucesso!");
+      swal.successToast("Avatar atualizado com sucesso!");
     } catch (err) {
-      setError(err.message || "Erro ao atualizar avatar.");
+      swal.errorToast(err.message || "Erro ao atualizar avatar.");
     } finally {
       setUploadingAvatar(false);
     }
@@ -69,8 +68,6 @@ export default function ProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setError("");
-    setSuccess("");
     try {
       const updated = await api("/users/me", {
         method: "PUT",
@@ -78,9 +75,9 @@ export default function ProfilePage() {
       });
       setUserData(updated);
       localStorage.setItem("@Borala:user", JSON.stringify(updated));
-      setSuccess("Perfil atualizado com sucesso!");
+      swal.successToast("Perfil atualizado com sucesso!");
     } catch (err) {
-      setError(err.message || "Erro ao atualizar perfil.");
+      swal.error(err.message || "Erro ao atualizar perfil.");
     } finally {
       setSaving(false);
     }
@@ -88,7 +85,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-page flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -97,8 +94,8 @@ export default function ProfilePage() {
   const initial = userData?.name?.[0]?.toUpperCase() || "?";
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-page">
+      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-blue-100/80">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate("/")}
@@ -151,16 +148,16 @@ export default function ProfilePage() {
             <p className="text-sm text-slate-500 mb-5">{userData?.email}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-1">Nascimento</p>
+              <div className="bg-blue-50/60 rounded-xl p-4 border border-blue-100">
+                <p className="section-label mb-1">Nascimento</p>
                 <p className="text-slate-700 font-medium text-sm">
                   {userData?.birth_date
                     ? new Date(userData.birth_date).toLocaleDateString("pt-BR")
                     : "—"}
                 </p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-1">Avaliação</p>
+              <div className="bg-blue-50/60 rounded-xl p-4 border border-blue-100">
+                <p className="section-label mb-1">Avaliação</p>
                 <div className="flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -170,8 +167,8 @@ export default function ProfilePage() {
                   </p>
                 </div>
               </div>
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-1">Telefone</p>
+              <div className="bg-blue-50/60 rounded-xl p-4 border border-blue-100">
+                <p className="section-label mb-1">Telefone</p>
                 <p className="text-slate-700 font-medium text-sm">{phone || "—"}</p>
               </div>
             </div>
@@ -180,17 +177,6 @@ export default function ProfilePage() {
 
         <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
           <h3 className="text-lg font-bold text-slate-800 mb-5">Editar informações</h3>
-
-          {error && (
-            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
-              {success}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit}>
             <Input

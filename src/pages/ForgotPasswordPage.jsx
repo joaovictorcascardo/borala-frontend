@@ -1,25 +1,28 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { swal } from "../lib/swal";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     try {
       await api("/authenticator/forgot-password", {
         method: "POST",
         body: JSON.stringify({ email }),
       });
-      setSent(true);
+      await swal.success(
+        "Verifique sua caixa de entrada e siga as instruções.",
+        "E-mail enviado!"
+      );
+      navigate("/login");
     } catch (err) {
-      setError(err.message || "Não foi possível enviar o e-mail. Tente novamente.");
+      swal.error(err.message || "Não foi possível enviar o e-mail. Tente novamente.");
     }
   };
 
@@ -47,27 +50,16 @@ export default function ForgotPasswordPage() {
             Informe seu e-mail e enviaremos as instruções de recuperação
           </p>
 
-          {sent ? (
-            <div className="px-4 py-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm text-center">
-              Instruções enviadas! Verifique sua caixa de entrada.
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              {error && (
-                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-                  {error}
-                </div>
-              )}
-              <Input
-                id="email"
-                label="Seu e-mail"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Button type="submit" text="Enviar instruções" />
-            </form>
-          )}
+          <form onSubmit={handleSubmit}>
+            <Input
+              id="email"
+              label="Seu e-mail"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Button type="submit" text="Enviar instruções" />
+          </form>
         </div>
 
         <p className="text-center text-sm text-slate-500 mt-6">

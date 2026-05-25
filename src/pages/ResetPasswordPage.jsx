@@ -3,22 +3,20 @@ import { api } from "../services/api";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { swal } from "../lib/swal";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     if (password !== passwordConfirmation) {
-      setError("As senhas não coincidem.");
+      swal.error("As senhas não coincidem. Verifique e tente novamente.", "Senhas diferentes");
       return;
     }
 
@@ -31,10 +29,10 @@ export default function ResetPasswordPage() {
           password_confirmation: passwordConfirmation,
         }),
       });
-      setSuccess(true);
-      setTimeout(() => navigate("/login"), 2500);
+      await swal.success("Sua senha foi alterada. Faça login com a nova senha.", "Senha redefinida!");
+      navigate("/login");
     } catch (err) {
-      setError(err.message || "Não foi possível redefinir a senha. O link pode ter expirado.");
+      swal.error(err.message || "Não foi possível redefinir a senha. O link pode ter expirado.");
     }
   };
 
@@ -60,34 +58,23 @@ export default function ResetPasswordPage() {
           <h1 className="text-xl font-bold text-slate-800 mb-1">Criar nova senha</h1>
           <p className="text-slate-500 text-sm mb-6">Digite e confirme sua nova senha</p>
 
-          {success ? (
-            <div className="px-4 py-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm text-center">
-              Senha alterada com sucesso! Redirecionando...
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              {error && (
-                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-                  {error}
-                </div>
-              )}
-              <Input
-                id="password"
-                label="Nova senha"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Input
-                id="passwordConfirmation"
-                label="Confirmar nova senha"
-                type="password"
-                value={passwordConfirmation}
-                onChange={(e) => setPasswordConfirmation(e.target.value)}
-              />
-              <Button type="submit" text="Salvar nova senha" />
-            </form>
-          )}
+          <form onSubmit={handleSubmit}>
+            <Input
+              id="password"
+              label="Nova senha"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Input
+              id="passwordConfirmation"
+              label="Confirmar nova senha"
+              type="password"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+            />
+            <Button type="submit" text="Salvar nova senha" />
+          </form>
         </div>
 
         <p className="text-center text-sm text-slate-500 mt-6">

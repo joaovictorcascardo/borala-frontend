@@ -4,19 +4,23 @@ import RegisterPage from "../pages/RegisterPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import PublicRoute from "../components/PublicRoute";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
+
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot" element={<ForgotPasswordPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+        </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/profile" element={<ProfilePage />} />         
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/" element={<HomePage />} />
         </Route>
       </Routes>

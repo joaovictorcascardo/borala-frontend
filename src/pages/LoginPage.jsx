@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { useNavigate, Link, Navigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { swal } from "../lib/swal";
@@ -165,10 +165,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
-  if (localStorage.getItem("@Borala:token")) {
-    return <Navigate to="/" replace />;
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

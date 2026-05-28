@@ -65,7 +65,17 @@ export default function VehiclesPage() {
                             <p className="text-gray-600">Placa: {vehicle.license_plate}</p>
                             <p className="text-gray-600">Ano: {vehicle.year} | Vagas: {vehicle.seats}</p>
 
-                            <div className="mt-4 border-t pt-2 flex justify-end">
+
+                            <div className="mt-4 border-t pt-2 flex justify-end gap-4 items-center">
+
+                                <button
+                                    onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}
+                                    className="text-blue-500 hover:text-blue-700 text-sm font-semibold"
+                                >
+                                    Editar
+                                </button>
+
+
                                 <button
                                     onClick={() => handleDelete(vehicle.id)}
                                     className="text-red-500 hover:text-red-700 text-sm font-semibold"

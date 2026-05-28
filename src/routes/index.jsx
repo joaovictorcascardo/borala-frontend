@@ -10,6 +10,7 @@ import ProfilePage from "../pages/ProfilePage";
 import PublicProfilePage from "../pages/PublicProfilePage";
 import VehiclesPage from "../pages/VehiclesPage";
 import VehicleFormPage from "../pages/VehicleFormPage";
+import EditVehiclePage from "../pages/EditVehiclePage";
 
 export function AppRoutes() {
   return (
@@ -28,6 +29,8 @@ export function AppRoutes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/vehicles" element={<VehiclesPage />} />
           <Route path="/vehicles/new" element={<VehicleFormPage />} />
+          <Route path="/vehicles/:id" element={<EditVehiclePage />} />
+          <Route path="/vehicles/:id/edit" element={<EditVehiclePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

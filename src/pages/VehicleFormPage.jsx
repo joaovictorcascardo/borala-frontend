@@ -38,7 +38,7 @@ export default function VehicleFormPage() {
 
         } catch (error) {
             console.error(error);
-            swal.error("Erro", "Não foi possível adicionar o veículo.");
+            swal.error(error.message || "Não foi possível adicionar o veículo.", "Erro");
         }
     }
 

@@ -18,6 +18,22 @@ export default function VehicleFormPage() {
     async function handleSubmit(e) {
         e.preventDefault();
 
+        if (!brand || !model || !color || !licensePlate || !year || !seats) {
+            swal.error("Erro", "Por favor, preencha todos os campos.");
+            return;
+        }
+
+        const currentYear = new Date().getFullYear();
+        if (year < 1950 || year > currentYear + 1) {
+            swal.error("Erro", "Por favor, insira um ano válido.");
+            return;
+        }
+
+        if (licensePlate.length !== 7) {
+            swal.error("Erro", "A placa deve conter exatamente 7 caracteres.");
+            return;
+        }
+
         try {
             const data = {
                 brand: brand,
@@ -38,7 +54,8 @@ export default function VehicleFormPage() {
 
         } catch (error) {
             console.error(error);
-            swal.error(error.message || "Não foi possível adicionar o veículo.", "Erro");
+            const message = error.response?.data?.message || error.message || "Não foi possível adicionar o veículo.";
+            swal.error("Erro", message);
         }
     }
 

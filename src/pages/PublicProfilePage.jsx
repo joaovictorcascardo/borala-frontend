@@ -14,11 +14,11 @@ export default function PublicProfilePage() {
     const fetchUserProfile = async () => {
       try {
         setIsLoading(true);
-        const response = await api(`/users/${id}`);
-        setUser(response);
+        const response = await api.get(`/users/${id}`);
+        setUser(response.data);
       } catch (err) {
         console.error(err);
-        setError("Não foi possível carregar o perfil deste usuário.");
+        setError("Não carregou o perfil deste usuário.");
       } finally {
         setIsLoading(false);
       }

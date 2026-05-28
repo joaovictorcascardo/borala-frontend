@@ -14,8 +14,8 @@ export default function PublicProfilePage() {
     const fetchUserProfile = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get(`/users/${id}`);
-        setUser(response.data);
+        const response = await api(`/users/${id}`);
+        setUser(response);
       } catch (err) {
         console.error(err);
         setError("Não carregou o perfil deste usuário.");

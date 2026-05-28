@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import swal from "../lib/swal";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
+import { swal } from "../lib/swal";
 
 export default function VehicleFormPage() {
     const navigate = useNavigate();
@@ -100,7 +100,7 @@ export default function VehicleFormPage() {
                 </div>
 
                 <div className="flex gap-4 mt-4">
-                    <Button type="submit">Salvar Veículo</Button>
+                    <Button type="submit" text="Salvar Veículo" />
                     <button
                         type="button"
                         onClick={() => navigate("/vehicles")}

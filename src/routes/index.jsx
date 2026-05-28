@@ -7,6 +7,8 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
+import PublicProfilePage from "../pages/PublicProfilePage";
+import VehiclesPage from "../pages/VehiclesPage";
 
 export function AppRoutes() {
   return (

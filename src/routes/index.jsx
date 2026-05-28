@@ -7,6 +7,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
+import VehiclesPage from "../pages/VehiclesPage";
 
 export function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/" element={<HomePage />} />
+          <Route path="/vehicles" element={<VehiclesPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

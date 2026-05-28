@@ -9,6 +9,7 @@ import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import PublicProfilePage from "../pages/PublicProfilePage";
 import VehiclesPage from "../pages/VehiclesPage";
+import VehicleFormPage from "../pages/VehicleFormPage";
 
 export function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ export function AppRoutes() {
           <Route path="/users/:id" element={<PublicProfilePage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/vehicles" element={<VehiclesPage />} />
+          <Route path="/vehicles/new" element={<VehicleFormPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

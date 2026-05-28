@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { api } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 export default function VehiclesPage() {
+    const navigate = useNavigate();
     const [vehicles, setVehicles] = useState([]);
 
     useEffect(() => {
@@ -21,7 +23,15 @@ export default function VehiclesPage() {
 
     return (
         <div className="p-8">
-            <h1 className="text-2xl font-bold mb-6">Meus Veículos</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Meus Veículos</h1>
+                <button
+                    onClick={() => navigate("/vehicles/new")}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                    Adicionar Veículo
+                </button>
+            </div>
 
             {vehicles.length === 0 ? (
                 <p>Você ainda não possui veículos cadastrados.</p>

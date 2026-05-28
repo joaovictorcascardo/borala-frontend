@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {api} from '../services/api'; 
+import { api } from '../services/api';
 
 export default function PublicProfilePage() {
   const { id } = useParams();
@@ -14,8 +14,8 @@ export default function PublicProfilePage() {
     const fetchUserProfile = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get(`/users/${id}`);
-        setUser(response.data);
+        const response = await api(`/users/${id}`);
+        setUser(response);
       } catch (err) {
         console.error(err);
         setError("Não foi possível carregar o perfil deste usuário.");
@@ -27,7 +27,7 @@ export default function PublicProfilePage() {
     fetchUserProfile();
   }, [id]);
 
-  
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -36,7 +36,7 @@ export default function PublicProfilePage() {
     );
   }
 
- 
+
   if (error) {
     return (
       <div className="error-container">
@@ -48,28 +48,28 @@ export default function PublicProfilePage() {
     );
   }
 
-  
+
   return (
     <div className="profile-page-container">
       <div className="profile-card">
-        
-       
+
+
         <div className="profile-header">
           <div className="profile-avatar">
             {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
           </div>
-          
+
           <div className="profile-info">
             <h1>{user?.name}</h1>
             <p>{user?.email}</p>
-            
+
             <div className="profile-rating">
               Nota: {user?.rating ? user.rating : 'Não tem avaliações'}
             </div>
           </div>
         </div>
 
-        
+
         <div className="profile-body">
           <h2>Sobre o Viajante</h2>
           <p className="profile-bio">
@@ -77,9 +77,9 @@ export default function PublicProfilePage() {
           </p>
         </div>
 
-        
+
         <div className="profile-actions">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="btn-secondary"
           >

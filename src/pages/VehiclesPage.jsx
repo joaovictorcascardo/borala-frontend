@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { swal } from "../lib/swal";
 
 export default function VehiclesPage() {
     const navigate = useNavigate();
@@ -20,6 +21,24 @@ export default function VehiclesPage() {
 
         loadVehicles();
     }, []);
+
+    async function handleDelete(id) {
+        const isConfirmed = await swal.confirm(
+            "Tem a certeza?",
+            "Esta ação não pode ser desfeita!"
+        );
+
+        if (isConfirmed.isConfirmed) {
+            try {
+                await api(`/vehicles/${id}`, { method: "DELETE" });
+                swal.success("Sucesso!", "O veículo foi removido.");
+                setVehicles(vehicles.filter((v) => v.id !== id));
+            } catch (error) {
+                console.error("Erro ao eliminar:", error);
+                swal.error("Erro", "Não foi possível remover o veículo.");
+            }
+        }
+    }
 
     return (
         <div className="p-8">
@@ -45,6 +64,15 @@ export default function VehiclesPage() {
                             <p className="text-gray-600">Cor: {vehicle.color}</p>
                             <p className="text-gray-600">Placa: {vehicle.license_plate}</p>
                             <p className="text-gray-600">Ano: {vehicle.year} | Vagas: {vehicle.seats}</p>
+
+                            <div className="mt-4 border-t pt-2 flex justify-end">
+                                <button
+                                    onClick={() => handleDelete(vehicle.id)}
+                                    className="text-red-500 hover:text-red-700 text-sm font-semibold"
+                                >
+                                    Remover
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

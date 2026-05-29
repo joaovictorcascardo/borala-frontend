@@ -107,18 +107,17 @@ export default function HomePage() {
               <p className="text-sm text-slate-500">Gerencie suas informações pessoais</p>
             </button>
 
-            <div className="card-base p-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center rounded-2xl z-10">
-                <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">Em breve</span>
+            <button
+              onClick={() => navigate("/vehicles")}
+              className="group card-base p-6 text-left hover:border-blue-200 hover:shadow-[0_4px_20px_rgba(37,99,235,0.10)] transition-all duration-300 cursor-pointer relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-400 to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl" />
+              <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+                <span className="text-blue-600 font-bold text-lg">C</span>
               </div>
-              <div className="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-slate-300 mb-1">Explorar</h3>
-              <p className="text-sm text-slate-300">Descubra novos destinos</p>
-            </div>
+              <h3 className="font-semibold text-slate-800 mb-1">Meus Veículos</h3>
+              <p className="text-sm text-slate-500">Gerencie sua frota de veículos</p>
+            </button>
 
             <div className="card-base p-6 relative overflow-hidden">
               <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center rounded-2xl z-10">

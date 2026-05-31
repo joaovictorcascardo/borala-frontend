@@ -12,6 +12,8 @@ import VehiclesPage from "../pages/VehiclesPage";
 import VehicleFormPage from "../pages/VehicleFormPage";
 import EditVehiclePage from "../pages/EditVehiclePage";
 import EventsPage from "../pages/EventsPage";
+import EventRidesPage from "../pages/EventRidesPage";
+import CreateRidePage from "../pages/CreateRidePage";
 
 export function AppRoutes() {
   return (
@@ -25,14 +27,16 @@ export function AppRoutes() {
         </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/events" element={<EventsPage />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/users/:id" element={<PublicProfilePage />} />
-          <Route path="/" element={<HomePage />} />
           <Route path="/vehicles" element={<VehiclesPage />} />
           <Route path="/vehicles/new" element={<VehicleFormPage />} />
           <Route path="/vehicles/:id" element={<EditVehiclePage />} />
           <Route path="/vehicles/:id/edit" element={<EditVehiclePage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id/rides" element={<EventRidesPage />} />
+          <Route path="/rides/new" element={<CreateRidePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

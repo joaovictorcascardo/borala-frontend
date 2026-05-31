@@ -119,18 +119,33 @@ export default function HomePage() {
               <p className="text-sm text-slate-500">Gerencie sua frota de veículos</p>
             </button>
 
-            <div className="card-base p-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center rounded-2xl z-10">
-                <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">Em breve</span>
-              </div>
-              <div className="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button
+              onClick={() => navigate("/events")}
+              className="group card-base p-6 text-left hover:border-blue-200 hover:shadow-[0_4px_20px_rgba(37,99,235,0.10)] transition-all duration-300 cursor-pointer relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-400 to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl" />
+              <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-slate-300 mb-1">Minhas Viagens</h3>
-              <p className="text-sm text-slate-300">Histórico e próximas viagens</p>
-            </div>
+              <h3 className="font-semibold text-slate-800 mb-1">Eventos</h3>
+              <p className="text-sm text-slate-500">Veja eventos e caronas disponíveis</p>
+            </button>
+
+            <button
+              onClick={() => navigate("/rides/new")}
+              className="group card-base p-6 text-left hover:border-blue-200 hover:shadow-[0_4px_20px_rgba(37,99,235,0.10)] transition-all duration-300 cursor-pointer relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-400 to-sky-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl" />
+              <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-slate-800 mb-1">Oferecer Carona</h3>
+              <p className="text-sm text-slate-500">Crie uma carona sem vínculo com evento</p>
+            </button>
           </div>
         </div>
       </main>

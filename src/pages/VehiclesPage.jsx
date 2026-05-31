@@ -27,7 +27,10 @@ export default function VehiclesPage() {
   }, []);
 
   async function handleDelete(id) {
-    const result = await swal.confirm("Tem certeza?", "Esta ação não pode ser desfeita!");
+    const result = await swal.confirm(
+      "Tem certeza?",
+      "Esta ação não pode ser desfeita!",
+    );
     if (result.isConfirmed) {
       try {
         await api(`/vehicles/${id}`, { method: "DELETE" });
@@ -52,7 +55,10 @@ export default function VehiclesPage() {
             </button>
             <span className="font-semibold text-slate-800">Meus Veículos</span>
           </div>
-          <button onClick={() => navigate("/vehicles/new")} className="button-primary">
+          <button
+            onClick={() => navigate("/vehicles/new")}
+            className="button-primary"
+          >
             + Adicionar
           </button>
         </div>
@@ -62,9 +68,15 @@ export default function VehiclesPage() {
         <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-white p-8 shadow-[0_4px_20px_rgba(37,99,235,0.10)]">
           <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-400/10 blur-[60px] pointer-events-none" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" />
-          <p className="relative text-xs font-bold uppercase tracking-[0.3em] text-blue-600">Motorista</p>
-          <h1 className="relative mt-2 text-4xl font-bold text-slate-900">Meus veículos</h1>
-          <p className="relative mt-3 text-slate-500 max-w-xl">Cadastre e gerencie os veículos vinculados à sua conta.</p>
+          <p className="relative text-xs font-bold uppercase tracking-[0.3em] text-blue-600">
+            Motorista
+          </p>
+          <h1 className="relative mt-2 text-4xl font-bold text-slate-900">
+            Meus veículos
+          </h1>
+          <p className="relative mt-3 text-slate-500 max-w-xl">
+            Cadastre e gerencie os veículos vinculados à sua conta.
+          </p>
         </div>
 
         {loading ? (
@@ -73,16 +85,25 @@ export default function VehiclesPage() {
           </div>
         ) : vehicles.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
-            <p className="text-slate-500 mb-5">Você ainda não possui veículos cadastrados.</p>
-            <button onClick={() => navigate("/vehicles/new")} className="button-primary">
+            <p className="text-slate-500 mb-5">
+              Você ainda não possui veículos cadastrados.
+            </p>
+            <button
+              onClick={() => navigate("/vehicles/new")}
+              className="button-primary"
+            >
               Cadastrar primeiro veículo
             </button>
           </div>
         ) : (
           <section className="space-y-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-600">Frota</p>
-              <h2 className="mt-1 text-xl font-bold text-slate-900">Veículos cadastrados</h2>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-600">
+                Frota
+              </p>
+              <h2 className="mt-1 text-xl font-bold text-slate-900">
+                Veículos cadastrados
+              </h2>
             </div>
             <ul className="grid gap-4 sm:grid-cols-2">
               {vehicles.map((vehicle) => (
@@ -92,14 +113,20 @@ export default function VehiclesPage() {
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
-                      <p className="font-bold text-slate-900">{vehicle.brand} {vehicle.model}</p>
-                      <p className="text-sm text-slate-500 mt-0.5">{vehicle.license_plate}</p>
+                      <p className="font-bold text-slate-900">
+                        {vehicle.brand} {vehicle.model}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-0.5">
+                        {vehicle.license_plate}
+                      </p>
                     </div>
                     <span className="rounded-full border border-blue-300/50 bg-blue-50 px-3 py-0.5 text-xs font-bold text-blue-600 shrink-0">
                       {vehicle.seats} vagas
                     </span>
                   </div>
-                  <p className="text-sm text-slate-500">{vehicle.color} · {vehicle.year}</p>
+                  <p className="text-sm text-slate-500">
+                    {vehicle.color} · {vehicle.year}
+                  </p>
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
                     <button
                       onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}

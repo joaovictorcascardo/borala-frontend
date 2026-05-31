@@ -11,6 +11,7 @@ import PublicProfilePage from "../pages/PublicProfilePage";
 import VehiclesPage from "../pages/VehiclesPage";
 import VehicleFormPage from "../pages/VehicleFormPage";
 import EditVehiclePage from "../pages/EditVehiclePage";
+import EventsPage from "../pages/EventsPage";
 
 export function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ export function AppRoutes() {
         </Route>
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/events" element={<EventsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/users/:id" element={<PublicProfilePage />} />
           <Route path="/" element={<HomePage />} />

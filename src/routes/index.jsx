@@ -5,6 +5,7 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
+import Layout from "../components/Layout";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import PublicProfilePage from "../pages/PublicProfilePage";
@@ -14,6 +15,9 @@ import EditVehiclePage from "../pages/EditVehiclePage";
 import EventsPage from "../pages/EventsPage";
 import EventRidesPage from "../pages/EventRidesPage";
 import CreateRidePage from "../pages/CreateRidePage";
+import RidesPage from "../pages/RidesPage";
+import RideDetailPage from "../pages/RideDetailPage";
+import MyRidesPage from "../pages/MyRidesPage";
 
 export function AppRoutes() {
   return (
@@ -27,16 +31,21 @@ export function AppRoutes() {
         </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/users/:id" element={<PublicProfilePage />} />
-          <Route path="/vehicles" element={<VehiclesPage />} />
-          <Route path="/vehicles/new" element={<VehicleFormPage />} />
-          <Route path="/vehicles/:id" element={<EditVehiclePage />} />
-          <Route path="/vehicles/:id/edit" element={<EditVehiclePage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/events/:id/rides" element={<EventRidesPage />} />
-          <Route path="/rides/new" element={<CreateRidePage />} />
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/users/:id" element={<PublicProfilePage />} />
+            <Route path="/vehicles" element={<VehiclesPage />} />
+            <Route path="/vehicles/new" element={<VehicleFormPage />} />
+            <Route path="/vehicles/:id" element={<EditVehiclePage />} />
+            <Route path="/vehicles/:id/edit" element={<EditVehiclePage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/:id/rides" element={<EventRidesPage />} />
+            <Route path="/rides/new" element={<CreateRidePage />} />
+            <Route path="/rides" element={<RidesPage />} />
+            <Route path="/rides/:id" element={<RideDetailPage />} />
+            <Route path="/my-rides" element={<MyRidesPage />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -3,59 +3,171 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { swal } from "../lib/swal";
 
-const STATUS_CONFIG = {
-  pending:   { label: "Aguardando", bg: "bg-amber-400/20",  text: "text-amber-300",  dot: "bg-amber-400"  },
-  active:    { label: "Em andamento", bg: "bg-blue-400/20", text: "text-blue-300",   dot: "bg-blue-400"   },
-  completed: { label: "Concluída",  bg: "bg-emerald-400/20",text: "text-emerald-300",dot: "bg-emerald-400"},
-  cancelled: { label: "Cancelada",  bg: "bg-red-400/20",    text: "text-red-300",    dot: "bg-red-400"    },
+const C = {
+  ink: "#0E1B3D",
+  navy: "#15327A",
+  blue: "#1E50E0",
+  sky: "#3B9AE1",
+  bg: "#F4F7FC",
+  bgCool: "#EAF1FB",
+  surface: "#FFFFFF",
+  border: "#E3E9F4",
+  muted: "#5B6B86",
+  faint: "#9AA8C0",
+  green: "#1E7A4F",
+  greenBg: "#E6F4EC",
+  star: "#F2A93B",
+  gradient: "linear-gradient(135deg, #46A6EE, #1E50E0)",
 };
 
-function PassengerSlot({ booking, isMe }) {
-  const user = booking?.user ?? {};
-  const isPending = booking?.status === "pending";
-  const [imgErr, setImgErr] = useState(false);
+const outfit = "'Outfit', sans-serif";
+const jakarta = "'Plus Jakarta Sans', sans-serif";
 
-  if (!booking) {
-    return (
-      <div className="flex flex-col items-center gap-2">
-        <div className="relative w-[72px] h-[72px] rounded-2xl border-2 border-dashed border-slate-600 bg-slate-800/60 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </div>
-        <span className="text-xs font-medium text-slate-500">Livre</span>
-      </div>
-    );
-  }
-
-  const initial = user.name?.[0]?.toUpperCase() ?? "?";
-  const showImg = user.profile_picture_url && !imgErr;
-
+function Icon({ d, size = 18, color = C.blue, strokeWidth = 1.9 }) {
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className={`relative w-[72px] h-[72px] rounded-2xl overflow-hidden flex items-center justify-center font-bold text-xl
-        ${isMe
-          ? "ring-2 ring-offset-2 ring-offset-slate-900 ring-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.5)]"
-          : isPending
-          ? "bg-amber-900/40 border border-amber-700/50 text-amber-400"
-          : "bg-slate-700 text-slate-200"
-        }`}
-      >
-        {showImg
-          ? <img src={user.profile_picture_url} alt={initial} className="w-full h-full object-cover" onError={() => setImgErr(true)} />
-          : initial
-        }
-        {isPending && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      {Array.isArray(d) ? d.map((p, i) => <path key={i} d={p} />) : <path d={d} />}
+    </svg>
+  );
+}
+
+const ICONS = {
+  calendar: "M8 2v3M16 2v3M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
+  clock: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2",
+  seat: "M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M6 10V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4M6 14h12",
+  leaf: "M2 22 12 2l5 10M7.5 13.5l9 4.5M12 2c0 0 3 5 3 10s-3 10-3 10",
+  route: ["M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.36 2.64", "M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.36-2.64", "M8 12h8M12 8l4 4-4 4"],
+  car: "M3 17h18M5 17V9l2-4h10l2 4v8M9 17v-4h6v4",
+  shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+  star: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  message: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+  mapPin: ["M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z", "M12 10m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0"],
+  arrowRight: "M5 12h14M12 5l7 7-7 7",
+  wind: ["M9.59 4.59A2 2 0 1 1 11 8H2", "M12.59 19.41A2 2 0 1 0 14 16H2", "M17.59 11.41A2 2 0 1 1 19 8H2"],
+  usb: "M6 2h12M6 2v4l-2 2 2 2v4h12v-4l2-2-2-2V2M9 12v4M15 12v4",
+  noSmoking: "M2 22L22 2M17 12h1a4 4 0 0 1 4 4v0M3 12h13",
+};
+
+function RideMap({ origin, destination }) {
+  return (
+    <svg viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
+      <rect width="640" height="320" fill="#E7EEF8" />
+      <rect x="0" y="52" width="640" height="13" fill="#D2DEEF" />
+      <rect x="0" y="102" width="640" height="8" fill="#D2DEEF" />
+      <rect x="0" y="150" width="640" height="13" fill="#D2DEEF" />
+      <rect x="0" y="200" width="640" height="8" fill="#D2DEEF" />
+      <rect x="0" y="248" width="640" height="13" fill="#D2DEEF" />
+      <rect x="78" y="0" width="9" height="320" fill="#D2DEEF" />
+      <rect x="158" y="0" width="6" height="320" fill="#D2DEEF" />
+      <rect x="248" y="0" width="9" height="320" fill="#D2DEEF" />
+      <rect x="338" y="0" width="6" height="320" fill="#D2DEEF" />
+      <rect x="438" y="0" width="9" height="320" fill="#D2DEEF" />
+      <rect x="538" y="0" width="6" height="320" fill="#D2DEEF" />
+      <rect x="88" y="65" width="62" height="80" rx="4" fill="#DCE6F4" />
+      <rect x="168" y="65" width="72" height="28" rx="4" fill="#DCE6F4" />
+      <rect x="168" y="112" width="72" height="33" rx="4" fill="#DCE6F4" />
+      <rect x="258" y="65" width="72" height="80" rx="4" fill="#DCE6F4" />
+      <rect x="88" y="163" width="62" height="30" rx="4" fill="#DCE6F4" />
+      <rect x="88" y="212" width="62" height="30" rx="4" fill="#DCE6F4" />
+      <rect x="168" y="163" width="72" height="80" rx="4" fill="#DCE6F4" />
+      <rect x="348" y="18" width="82" height="28" rx="4" fill="#DCE6F4" />
+      <rect x="448" y="18" width="82" height="28" rx="4" fill="#DCE6F4" />
+      <rect x="348" y="65" width="82" height="80" rx="4" fill="#DCE6F4" />
+      <rect x="448" y="65" width="82" height="38" rx="4" fill="#DCE6F4" />
+      <rect x="448" y="112" width="82" height="33" rx="4" fill="#DCE6F4" />
+      <rect x="258" y="163" width="172" height="30" rx="4" fill="#DCE6F4" />
+      <rect x="348" y="212" width="82" height="30" rx="4" fill="#DCE6F4" />
+      <rect x="548" y="65" width="84" height="80" rx="4" fill="#DCE6F4" />
+      <rect x="548" y="163" width="84" height="80" rx="4" fill="#DCE6F4" />
+      <defs>
+        <linearGradient id="rg" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#46A6EE" />
+          <stop offset="100%" stopColor="#1E50E0" />
+        </linearGradient>
+        <filter id="ps">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="rgba(30,80,224,0.45)" />
+        </filter>
+        <filter id="cs">
+          <feDropShadow dx="0" dy="2" stdDeviation="5" floodColor="rgba(0,0,0,0.13)" />
+        </filter>
+        <clipPath id="chip1"><rect x="18" y="256" width="186" height="54" rx="12" /></clipPath>
+        <clipPath id="chip2"><rect x="18" y="318" width="186" height="54" rx="12" /></clipPath>
+      </defs>
+      <path d="M 96 288 C 180 250, 280 190, 400 118 C 460 82, 505 52, 555 26" stroke="url(#rg)" strokeWidth="6" fill="none" strokeLinecap="round" />
+      <circle cx="96" cy="288" r="13" fill="white" stroke="#1E50E0" strokeWidth="3" />
+      <circle cx="96" cy="288" r="5" fill="#1E50E0" />
+      <g filter="url(#ps)">
+        <circle cx="555" cy="20" r="14" fill="url(#rg)" />
+        <polygon points="543,28 567,28 555,46" fill="url(#rg)" />
+        <circle cx="555" cy="20" r="7" fill="white" />
+      </g>
+      <g filter="url(#cs)">
+        <rect x="18" y="244" width="190" height="56" rx="12" fill="rgba(255,255,255,0.94)" />
+        <text x="30" y="262" fontSize="10" fill="#9AA8C0" fontFamily="Plus Jakarta Sans, sans-serif" fontWeight="600" letterSpacing="1.2">ORIGEM</text>
+        <text x="30" y="280" fontSize="13.5" fill="#0E1B3D" fontFamily="Plus Jakarta Sans, sans-serif" fontWeight="700">{origin?.substring(0, 20) || "Ponto de partida"}</text>
+      </g>
+    </svg>
+  );
+}
+
+function MetricCard({ icon, value, label }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: 12, background: C.bgCool,
+        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+      }}>
+        <Icon d={ICONS[icon]} size={20} color={C.blue} />
+      </div>
+      <div>
+        <div style={{ fontFamily: outfit, fontWeight: 700, fontSize: 18, color: C.ink, lineHeight: 1.2 }}>{value}</div>
+        <div style={{ fontFamily: jakarta, fontSize: 12.5, color: C.faint, marginTop: 1 }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function TimelineStop({ type, time, name, sub }) {
+  const markerSize = type === "start" ? 14 : type === "end" ? 14 : 10;
+  return (
+    <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, width: 14 }}>
+        {type === "start" && (
+          <>
+            <div style={{
+              width: 14, height: 14, borderRadius: "50%", background: C.blue,
+              boxShadow: `0 0 0 4px ${C.bgCool}`,
+              flexShrink: 0,
+            }} />
+          </>
+        )}
+        {type === "mid" && (
+          <div style={{ width: 10, height: 10, borderRadius: "50%", border: `2px solid ${C.faint}`, background: C.surface, flexShrink: 0, marginLeft: 2 }} />
+        )}
+        {type === "end" && (
+          <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2.5px solid ${C.navy}`, background: C.surface, flexShrink: 0 }} />
         )}
       </div>
-      <span className={`text-xs font-semibold max-w-[72px] text-center truncate leading-tight ${isMe ? "text-blue-400" : "text-slate-400"}`}>
-        {isMe ? "Você" : user.name?.split(" ")[0] ?? "—"}
-      </span>
+      <div style={{ flex: 1, paddingBottom: type === "end" ? 0 : 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+          <span style={{ fontFamily: jakarta, fontWeight: 700, fontSize: 15, color: C.ink }}>{name}</span>
+          <span style={{ fontFamily: outfit, fontWeight: 700, fontSize: 14, color: C.navy, flexShrink: 0 }}>{time}</span>
+        </div>
+        <div style={{ fontFamily: jakarta, fontSize: 12.5, color: C.faint, marginTop: 3 }}>{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+function AmenityChip({ icon, label }) {
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      border: `1px solid ${C.border}`, borderRadius: 20, padding: "5px 12px",
+      fontFamily: jakarta, fontSize: 12.5, fontWeight: 500, color: C.muted,
+    }}>
+      <Icon d={ICONS[icon]} size={14} color={C.muted} />
+      {label}
     </div>
   );
 }
@@ -67,6 +179,7 @@ export default function RideDetailPage() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [seatCount, setSeatCount] = useState(1);
 
   const currentUser = (() => {
     try { return JSON.parse(localStorage.getItem("@Borala:user")); } catch { return null; }
@@ -93,12 +206,12 @@ export default function RideDetailPage() {
     const { isConfirmed } = await swal.confirm(
       "Garantir vaga nesta carona?",
       ride.automatic_approval ? "Confirmação automática." : "O motorista precisará aprovar.",
-      { confirmText: "Garantir vaga" }
+      { confirmText: "Reservar carona" }
     );
     if (!isConfirmed) return;
     setActionLoading(true);
     try {
-      await api(`/rides/${id}/bookings`, { method: "POST", body: JSON.stringify({ seats_booked: 1 }) });
+      await api(`/rides/${id}/bookings`, { method: "POST", body: JSON.stringify({ seats_booked: seatCount }) });
       await loadAll();
       swal.successToast(ride.automatic_approval ? "Vaga garantida!" : "Solicitação enviada!");
     } catch (err) {
@@ -125,9 +238,7 @@ export default function RideDetailPage() {
 
   async function changeStatus(status) {
     const labels = { active: "iniciar", completed: "concluir", cancelled: "cancelar" };
-    const { isConfirmed } = await swal.confirm(`Deseja ${labels[status]} esta carona?`, "", {
-      confirmText: "Confirmar", danger: status === "cancelled",
-    });
+    const { isConfirmed } = await swal.confirm(`Deseja ${labels[status]} esta carona?`, "", { confirmText: "Confirmar", danger: status === "cancelled" });
     if (!isConfirmed) return;
     setActionLoading(true);
     try {
@@ -143,7 +254,7 @@ export default function RideDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-24">
+      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}>
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -151,245 +262,408 @@ export default function RideDetailPage() {
 
   if (!ride) {
     return (
-      <main className="max-w-xl mx-auto px-4 py-8">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-          Voltar
-        </button>
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">Carona não encontrada.</p>
-      </main>
+      <div style={{ background: C.bg, minHeight: "60vh", fontFamily: jakarta }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px" }}>
+          <button onClick={() => navigate(-1)} style={{ display: "flex", alignItems: "center", gap: 6, color: C.muted, fontFamily: jakarta, fontSize: 14, fontWeight: 500, background: "none", border: "none", cursor: "pointer", marginBottom: 24 }}>
+            <Icon d={ICONS.arrowRight} size={16} color={C.muted} /> Voltar
+          </button>
+          <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 14, padding: "16px 20px", color: "#DC2626", fontSize: 14 }}>
+            Carona não encontrada.
+          </div>
+        </div>
+      </div>
     );
   }
 
   const driverInfo = ride.driver ?? ride.user;
   const isDriver = currentUser && driverInfo && currentUser.id === driverInfo.id;
-  const activeBookings = bookings.filter((b) => b.status !== "cancelled" && b.status !== "rejected");
-  const myBooking = activeBookings.find((b) => (b.user_id ?? b.user?.id) === currentUser?.id);
+  const activeBookings = bookings.filter(b => b.status !== "cancelled" && b.status !== "rejected");
+  const myBooking = activeBookings.find(b => (b.user_id ?? b.user?.id) === currentUser?.id);
   const totalSeats = ride.available_seats ?? 0;
-  const slots = Array.from({ length: totalSeats }, (_, i) => activeBookings[i] ?? null);
-  const hasEmptySlot = activeBookings.length < totalSeats;
-  const canBook = !isDriver && !myBooking && hasEmptySlot && ride.status === "pending";
-  const statusCfg = STATUS_CONFIG[ride.status] ?? { label: ride.status, bg: "bg-slate-700", text: "text-slate-300", dot: "bg-slate-400" };
+  const freeSeats = Math.max(0, totalSeats - activeBookings.length);
+  const canBook = !isDriver && !myBooking && freeSeats > 0 && ride.status === "pending";
 
-  const formattedDate = new Date(ride.departure_time).toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" });
-  const formattedTime = new Date(ride.departure_time).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const driverInitials = driverInfo?.name
+    ?.split(" ")
+    .slice(0, 2)
+    .map(n => n[0])
+    .join("") ?? "?";
+
+  const depDate = new Date(ride.departure_time);
+  const depDateStr = depDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+  const depTimeStr = depDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  const originShort = ride.origin_address?.split(",")[0] ?? "Origem";
+  const destShort = ride.destination_address?.split(",")[0] ?? "Destino";
+
+  const confirmedPassengers = activeBookings.filter(b => b.status === "confirmed" || b.status === "pending");
+
+  const STATUS_LABEL = { pending: "Aguardando", active: "Em andamento", completed: "Concluída", cancelled: "Cancelada" };
+  const STATUS_COLOR = { pending: "#D97706", active: C.blue, completed: C.green, cancelled: "#DC2626" };
+  const STATUS_BG = { pending: "#FFFBEB", active: C.bgCool, completed: C.greenBg, cancelled: "#FEF2F2" };
 
   return (
-    <main className="max-w-xl mx-auto px-4 py-8 space-y-4">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-        Voltar
-      </button>
+    <div style={{ background: C.bg, minHeight: "100vh", fontFamily: jakarta }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px" }}>
 
-      {/* Hero card — dark */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-7 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/15 via-transparent to-indigo-600/10 pointer-events-none" />
-        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+        <nav style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13.5, color: C.faint, fontFamily: jakarta, marginBottom: 24, flexWrap: "wrap" }}>
+          <span style={{ cursor: "pointer" }} onClick={() => navigate("/rides")}>Caronas</span>
+          <span>/</span>
+          <span style={{ cursor: "pointer" }}>{originShort} → {destShort}</span>
+          <span>/</span>
+          <span style={{ color: C.ink, fontWeight: 600 }}>Detalhes</span>
+        </nav>
 
-        <div className="relative flex items-start justify-between gap-3 mb-6">
-          <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${statusCfg.bg} ${statusCfg.text}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
-            {statusCfg.label}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12, flexWrap: "wrap" }}>
+            <h1 style={{ fontFamily: outfit, fontWeight: 800, fontSize: 34, color: C.ink, letterSpacing: "-0.02em", margin: 0 }}>
+              {originShort} → {destShort}
+            </h1>
+            {ride.status && (
+              <span style={{
+                background: STATUS_BG[ride.status] ?? C.bgCool,
+                color: STATUS_COLOR[ride.status] ?? C.blue,
+                fontFamily: jakarta, fontWeight: 600, fontSize: 13,
+                borderRadius: 20, padding: "4px 12px",
+              }}>
+                {STATUS_LABEL[ride.status] ?? ride.status}
+              </span>
+            )}
           </div>
-          {ride.automatic_approval && (
-            <span className="text-xs font-semibold text-slate-400 border border-slate-700 rounded-full px-3 py-1">Aprovação automática</span>
-          )}
-        </div>
-
-        <div className="relative space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="mt-1.5 flex flex-col items-center gap-1.5 shrink-0">
-              <div className="w-3 h-3 rounded-full border-2 border-blue-400 bg-slate-900" />
-              <div className="w-px h-10 bg-gradient-to-b from-blue-400/60 to-indigo-400/60" style={{ backgroundImage: "repeating-linear-gradient(to bottom, rgba(99,102,241,0.5) 0, rgba(99,102,241,0.5) 4px, transparent 4px, transparent 8px)" }} />
-              <div className="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-            </div>
-            <div className="space-y-4 flex-1 min-w-0">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Partida</p>
-                <p className="font-bold text-white text-lg leading-tight truncate">{ride.origin_address}</p>
-              </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Destino</p>
-                <p className="font-bold text-white text-lg leading-tight truncate">{ride.destination_address}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative mt-6 pt-5 border-t border-slate-700/60 flex flex-wrap gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Data</p>
-            <p className="text-sm font-bold text-slate-200">{formattedDate}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Horário</p>
-            <p className="text-sm font-bold text-slate-200">{formattedTime}</p>
-          </div>
-          {ride.estimated_total_cost && (
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Custo est.</p>
-              <p className="text-sm font-bold text-emerald-400">R$ {Number(ride.estimated_total_cost).toFixed(2)}</p>
-            </div>
-          )}
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Vagas</p>
-            <p className="text-sm font-bold text-slate-200">{totalSeats}</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14.5, color: C.muted }}>
+              <Icon d={ICONS.calendar} size={16} color={C.faint} />
+              {depDateStr.charAt(0).toUpperCase() + depDateStr.slice(1)}
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14.5, color: C.muted }}>
+              <Icon d={ICONS.clock} size={16} color={C.faint} />
+              Saída {depTimeStr}
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14.5, color: C.green, fontWeight: 700 }}>
+              <Icon d={ICONS.seat} size={16} color={C.green} />
+              {freeSeats} assento{freeSeats !== 1 ? "s" : ""} livre{freeSeats !== 1 ? "s" : ""}
+            </span>
           </div>
         </div>
 
-        {ride.additional_info && (
-          <div className="relative mt-4 rounded-xl bg-slate-800/60 border border-slate-700/60 px-4 py-3">
-            <p className="text-xs text-slate-400 leading-relaxed">{ride.additional_info}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Driver */}
-      {driverInfo && (
-        <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-5 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-[0_4px_14px_rgba(99,102,241,0.35)]">
-            {driverInfo.profile_picture_url
-              ? <img src={driverInfo.profile_picture_url} alt="" className="w-full h-full object-cover rounded-2xl" />
-              : driverInfo.name?.[0]?.toUpperCase() ?? "?"
+        <div style={{ display: "grid", gridTemplateColumns: "1fr min(360px, 100%)", gap: 24, alignItems: "start" }} className="ride-detail-grid">
+          <style>{`
+            @media (max-width: 960px) {
+              .ride-detail-grid { grid-template-columns: 1fr !important; }
+              .ride-detail-sidebar { position: static !important; }
             }
+          `}</style>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 0 }}>
+
+            <div style={{ borderRadius: 20, border: `1px solid ${C.border}`, overflow: "hidden", height: 320, background: "#E7EEF8", position: "relative" }}>
+              <RideMap origin={ride.origin_address} destination={ride.destination_address} />
+              <div style={{
+                position: "absolute", bottom: 16, right: 16,
+                background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)",
+                borderRadius: 12, padding: "10px 14px", boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+              }}>
+                <div style={{ fontSize: 10.5, color: C.faint, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>DESTINO</div>
+                <div style={{ fontSize: 13.5, color: C.ink, fontWeight: 700 }}>{destShort}</div>
+              </div>
+            </div>
+
+            <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "20px 24px", display: "flex", gap: 0 }}>
+              {[
+                { icon: "clock", value: "~1h20", label: "Duração estimada" },
+                { icon: "route", value: "~98 km", label: "Distância" },
+                { icon: "leaf", value: "−12 kg", label: "CO₂ evitado" },
+              ].map((m, i) => (
+                <div key={i} style={{ display: "flex", flex: 1, alignItems: "stretch" }}>
+                  {i > 0 && <div style={{ width: 1, background: C.border, margin: "0 20px", flexShrink: 0 }} />}
+                  <MetricCard icon={m.icon} value={m.value} label={m.label} />
+                </div>
+              ))}
+            </div>
+
+            <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                <span style={{ fontFamily: outfit, fontWeight: 700, fontSize: 19, color: C.ink }}>Trajeto</span>
+                <button style={{ fontSize: 14, color: C.blue, fontFamily: jakarta, fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>
+                  Abrir mapa completo
+                </button>
+              </div>
+              <div style={{ position: "relative", paddingLeft: 7 }}>
+                <div style={{ position: "absolute", left: 6, top: 14, bottom: 14, width: 2, background: `linear-gradient(to bottom, ${C.blue}, ${C.bgCool})`, borderRadius: 2 }} />
+                <TimelineStop type="start" time={depTimeStr} name={originShort} sub={ride.origin_address} />
+                <TimelineStop type="mid" time={(() => { const d = new Date(depDate); d.setMinutes(d.getMinutes() + 25); return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); })()} name="Parada intermediária" sub="Parada rápida de 5 min" />
+                <TimelineStop type="end" time={(() => { const d = new Date(depDate); d.setMinutes(d.getMinutes() + 80); return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); })()} name={destShort} sub={ride.destination_address} />
+              </div>
+            </div>
+
+            {driverInfo && (
+              <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                  <span style={{ fontFamily: outfit, fontWeight: 700, fontSize: 19, color: C.ink }}>Sobre o motorista</span>
+                  <button onClick={() => navigate(`/users/${driverInfo.id}`)} style={{ fontSize: 14, color: C.blue, fontFamily: jakarta, fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>
+                    Ver perfil
+                  </button>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                  <div style={{
+                    width: 64, height: 64, borderRadius: "50%",
+                    background: C.gradient,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: outfit, fontWeight: 800, fontSize: 22, color: "#fff",
+                    flexShrink: 0,
+                    boxShadow: `0 0 0 3px white, 0 0 0 5px ${C.bgCool}`,
+                    overflow: "hidden",
+                  }}>
+                    {driverInfo.profile_picture_url
+                      ? <img src={driverInfo.profile_picture_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      : driverInitials
+                    }
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
+                      <span style={{ fontFamily: outfit, fontWeight: 700, fontSize: 19, color: C.ink }}>{driverInfo.name}</span>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                        background: C.greenBg, color: C.green,
+                        fontFamily: jakarta, fontWeight: 600, fontSize: 12,
+                        borderRadius: 20, padding: "3px 10px",
+                      }}>
+                        <Icon d={ICONS.shield} size={12} color={C.green} />
+                        Verificado
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <Icon d={ICONS.star} size={14} color={C.star} strokeWidth={0} style={{ fill: C.star }} />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill={C.star}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                      <span style={{ fontFamily: jakarta, fontSize: 14, color: C.muted }}>
+                        {driverInfo.average_rating ? Number(driverInfo.average_rating).toFixed(1) : "—"}
+                        {" · "}membro verificado
+                      </span>
+                    </div>
+                  </div>
+
+                  <button style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    border: `1.5px solid ${C.border}`, borderRadius: 12,
+                    padding: "9px 16px", background: C.surface, cursor: "pointer",
+                    fontFamily: jakarta, fontWeight: 600, fontSize: 14, color: C.blue,
+                    flexShrink: 0,
+                  }}>
+                    <Icon d={ICONS.message} size={15} color={C.blue} />
+                    Mensagem
+                  </button>
+                </div>
+
+                <div style={{ borderTop: `1px solid ${C.border}`, margin: "20px 0" }} />
+
+                <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: 12, background: C.bgCool,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    <Icon d={ICONS.car} size={24} color={C.blue} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: jakarta, fontWeight: 700, fontSize: 15.5, color: C.ink }}>
+                      {ride.vehicle ? `${ride.vehicle.brand} ${ride.vehicle.model}` : "Veículo cadastrado"}
+                    </div>
+                    <div style={{ fontFamily: jakarta, fontSize: 13, color: C.faint, marginTop: 2 }}>
+                      {ride.vehicle ? `${ride.vehicle.color} · ${ride.vehicle.year}` : "Ver perfil do motorista"}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <AmenityChip icon="wind" label="Ar-condicionado" />
+                    <AmenityChip icon="noSmoking" label="Não fumante" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isDriver && ride.status !== "completed" && ride.status !== "cancelled" && (
+              <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
+                <div style={{ fontFamily: outfit, fontWeight: 700, fontSize: 16, color: C.navy, marginBottom: 16 }}>Gerenciar carona</div>
+                <div style={{ display: "flex", gap: 12 }}>
+                  {ride.status === "pending" && (
+                    <button onClick={() => changeStatus("active")} disabled={actionLoading} style={{
+                      flex: 1, height: 48, borderRadius: 12, background: C.blue, color: "#fff",
+                      fontFamily: jakarta, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer",
+                      opacity: actionLoading ? 0.5 : 1,
+                    }}>Iniciar carona</button>
+                  )}
+                  {ride.status === "active" && (
+                    <button onClick={() => changeStatus("completed")} disabled={actionLoading} style={{
+                      flex: 1, height: 48, borderRadius: 12, background: C.green, color: "#fff",
+                      fontFamily: jakarta, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer",
+                      opacity: actionLoading ? 0.5 : 1,
+                    }}>Concluir carona</button>
+                  )}
+                  <button onClick={() => changeStatus("cancelled")} disabled={actionLoading} style={{
+                    flex: 1, height: 48, borderRadius: 12, border: "1.5px solid #FECACA",
+                    background: "#FEF2F2", color: "#DC2626",
+                    fontFamily: jakarta, fontWeight: 700, fontSize: 14, cursor: "pointer",
+                    opacity: actionLoading ? 0.5 : 1,
+                  }}>Cancelar</button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Motorista</p>
-            <p className="font-bold text-slate-900 text-base">{driverInfo.name}</p>
-            {driverInfo.average_rating ? (
-              <div className="flex items-center gap-1 mt-0.5">
-                {[1,2,3,4,5].map((n) => (
-                  <svg key={n} xmlns="http://www.w3.org/2000/svg" className={`w-3 h-3 ${n <= Math.round(Number(driverInfo.average_rating)) ? "text-amber-400" : "text-slate-200"}`} viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+
+          <div className="ride-detail-sidebar" style={{ position: "sticky", top: 96, display: "flex", flexDirection: "column", gap: 16 }}>
+
+            <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px", boxShadow: "0 4px 24px rgba(14,27,61,0.07)" }}>
+
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                  <span style={{ fontFamily: outfit, fontWeight: 800, fontSize: 32, color: C.ink }}>
+                    {ride.estimated_total_cost ? `R$ ${Number(ride.estimated_total_cost).toFixed(0)}` : "Grátis"}
+                  </span>
+                </div>
+                <span style={{ fontFamily: jakarta, fontSize: 14, color: C.faint }}>por pessoa</span>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+                <div style={{ borderRadius: 12, border: `1.5px solid ${C.border}`, padding: "12px 14px" }}>
+                  <div style={{ fontFamily: jakarta, fontSize: 12, fontWeight: 600, color: C.faint, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Assentos</div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: jakarta, fontSize: 14, fontWeight: 600, color: C.ink }}>
+                      <Icon d={ICONS.seat} size={15} color={C.blue} />
+                      {seatCount} assento{seatCount !== 1 ? "s" : ""}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <button onClick={() => setSeatCount(Math.max(1, seatCount - 1))} style={{
+                        width: 34, height: 34, borderRadius: 10, border: `1.5px solid ${C.border}`,
+                        background: C.bg, fontFamily: outfit, fontWeight: 700, fontSize: 18, color: C.ink,
+                        display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+                      }}>−</button>
+                      <span style={{ fontFamily: outfit, fontWeight: 700, fontSize: 16, color: C.ink, minWidth: 20, textAlign: "center" }}>{seatCount}</span>
+                      <button onClick={() => setSeatCount(Math.min(freeSeats, seatCount + 1))} style={{
+                        width: 34, height: 34, borderRadius: 10, border: `1.5px solid ${C.border}`,
+                        background: C.bg, fontFamily: outfit, fontWeight: 700, fontSize: 18, color: C.ink,
+                        display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+                      }}>+</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ borderRadius: 12, border: `1.5px solid ${C.border}`, padding: "12px 14px" }}>
+                  <div style={{ fontFamily: jakarta, fontSize: 12, fontWeight: 600, color: C.faint, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Ponto de embarque</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: jakarta, fontSize: 14, fontWeight: 600, color: C.ink }}>
+                    <Icon d={ICONS.mapPin} size={15} color={C.blue} />
+                    {originShort}
+                  </div>
+                </div>
+              </div>
+
+              {canBook && (
+                <button onClick={handleBook} disabled={actionLoading} style={{
+                  width: "100%", height: 54, borderRadius: 14,
+                  background: C.gradient, color: "#fff",
+                  fontFamily: jakarta, fontWeight: 700, fontSize: 15,
+                  border: "none", cursor: actionLoading ? "not-allowed" : "pointer",
+                  boxShadow: "0 8px 20px rgba(30,80,224,.3)",
+                  opacity: actionLoading ? 0.7 : 1,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  transition: "opacity 0.15s, transform 0.15s",
+                }}>
+                  {actionLoading
+                    ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    : <>Reservar carona <Icon d={ICONS.arrowRight} size={16} color="#fff" /></>
+                  }
+                </button>
+              )}
+
+              {myBooking && !isDriver && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{
+                    borderRadius: 12, padding: "12px 14px",
+                    background: myBooking.status === "pending" ? "#FFFBEB" : C.greenBg,
+                    border: `1px solid ${myBooking.status === "pending" ? "#FDE68A" : "#A7F3D0"}`,
+                    fontFamily: jakarta, fontWeight: 600, fontSize: 13.5,
+                    color: myBooking.status === "pending" ? "#92400E" : C.green,
+                    display: "flex", alignItems: "center", gap: 8,
+                  }}>
+                    <Icon d={myBooking.status === "pending" ? ICONS.clock : ICONS.shield} size={15} color={myBooking.status === "pending" ? "#D97706" : C.green} />
+                    {myBooking.status === "pending" ? "Aguardando aprovação" : "Vaga confirmada!"}
+                  </div>
+                  {ride.status === "pending" && (
+                    <button onClick={() => handleCancelBooking(myBooking.id)} disabled={actionLoading} style={{
+                      width: "100%", height: 44, borderRadius: 12,
+                      border: "1.5px solid #FECACA", background: "#FEF2F2",
+                      color: "#DC2626", fontFamily: jakarta, fontWeight: 600, fontSize: 14,
+                      cursor: "pointer", opacity: actionLoading ? 0.5 : 1,
+                    }}>
+                      Cancelar reserva
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!canBook && !myBooking && !isDriver && freeSeats === 0 && ride.status === "pending" && (
+                <div style={{ textAlign: "center", padding: "12px 0", fontFamily: jakarta, fontSize: 14, color: C.faint }}>
+                  Todas as vagas estão preenchidas.
+                </div>
+              )}
+
+              <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 16, paddingTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { icon: ICONS.shield, text: "Pagamento protegido pelo BoraLá", color: C.green },
+                  { icon: ICONS.clock, text: "Cancele grátis até 24h antes", color: C.muted },
+                ].map((g, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon d={g.icon} size={14} color={g.color} />
+                    <span style={{ fontFamily: jakarta, fontSize: 13, color: C.muted }}>{g.text}</span>
+                  </div>
                 ))}
-                <span className="text-xs font-semibold text-slate-500 ml-0.5">{Number(driverInfo.average_rating).toFixed(1)}</span>
               </div>
-            ) : (
-              <p className="text-xs text-slate-400 mt-0.5">Sem avaliações</p>
-            )}
-          </div>
-          <button
-            onClick={() => navigate(`/users/${driverInfo.id}`)}
-            className="text-xs font-bold text-blue-600 border border-blue-200 rounded-xl px-3 py-2 hover:bg-blue-50 transition-colors cursor-pointer shrink-0"
-          >
-            Ver perfil
-          </button>
-        </div>
-      )}
-
-      {/* Lobby */}
-      <div className="rounded-3xl bg-slate-900 border border-slate-800 shadow-[0_8px_32px_rgba(0,0,0,0.25)] p-6">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Passageiros</p>
-            <p className="font-bold text-white text-lg">
-              {activeBookings.length}
-              <span className="text-slate-500 font-normal text-base"> / {totalSeats}</span>
-            </p>
-          </div>
-          <div className="flex gap-1.5">
-            {activeBookings.filter(b => b.status === "confirmed").length > 0 && (
-              <span className="text-[11px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-700/50 rounded-full px-2.5 py-1">
-                {activeBookings.filter(b => b.status === "confirmed").length} confirmado{activeBookings.filter(b => b.status === "confirmed").length !== 1 ? "s" : ""}
-              </span>
-            )}
-            {activeBookings.filter(b => b.status === "pending").length > 0 && (
-              <span className="text-[11px] font-bold text-amber-400 bg-amber-400/10 border border-amber-700/50 rounded-full px-2.5 py-1">
-                {activeBookings.filter(b => b.status === "pending").length} aguardando
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-3 mb-6 min-h-[96px]">
-          {slots.map((booking, i) => (
-            <PassengerSlot
-              key={booking?.id ?? `empty-${i}`}
-              booking={booking}
-              isMe={(booking?.user_id ?? booking?.user?.id) === currentUser?.id}
-            />
-          ))}
-        </div>
-
-        {canBook && (
-          <button
-            onClick={handleBook}
-            disabled={actionLoading}
-            className="w-full flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-sm font-bold text-white shadow-[0_4px_20px_rgba(99,102,241,0.5)] hover:shadow-[0_6px_28px_rgba(99,102,241,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            {actionLoading
-              ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-            }
-            {actionLoading ? "Reservando..." : "Garantir minha vaga"}
-          </button>
-        )}
-
-        {!canBook && !myBooking && !isDriver && !hasEmptySlot && ride.status === "pending" && (
-          <div className="text-center py-3 text-sm text-slate-500 font-medium">
-            Todas as vagas estão preenchidas.
-          </div>
-        )}
-
-        {myBooking && !isDriver && (
-          <div className="space-y-3">
-            <div className={`rounded-2xl px-4 py-3 text-sm font-semibold flex items-center gap-2.5 ${
-              myBooking.status === "pending"
-                ? "bg-amber-400/10 border border-amber-700/40 text-amber-300"
-                : "bg-emerald-400/10 border border-emerald-700/40 text-emerald-300"
-            }`}>
-              {myBooking.status === "pending"
-                ? <><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Aguardando aprovação do motorista</>
-                : <><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Vaga confirmada!</>
-              }
             </div>
-            {ride.status === "pending" && (
-              <button
-                onClick={() => handleCancelBooking(myBooking.id)}
-                disabled={actionLoading}
-                className="w-full rounded-2xl border border-red-800/60 bg-red-400/10 py-3 text-sm font-bold text-red-400 hover:bg-red-400/20 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancelar reserva
-              </button>
-            )}
-          </div>
-        )}
-      </div>
 
-      {/* Driver actions */}
-      {isDriver && ride.status !== "completed" && ride.status !== "cancelled" && (
-        <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Gerenciar carona</p>
-          <div className="flex gap-2">
-            {ride.status === "pending" && (
-              <button
-                onClick={() => changeStatus("active")}
-                disabled={actionLoading}
-                className="flex-1 rounded-xl bg-blue-600 py-2.5 text-sm font-bold text-white hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Iniciar
-              </button>
+            {confirmedPassengers.length > 0 && (
+              <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ display: "flex" }}>
+                  {confirmedPassengers.slice(0, 3).map((b, i) => {
+                    const u = b.user ?? {};
+                    return (
+                      <div key={i} style={{
+                        width: 40, height: 40, borderRadius: "50%",
+                        background: [C.gradient, "linear-gradient(135deg,#F2A93B,#E05F20)", "linear-gradient(135deg,#6EE7B7,#059669)"][i % 3],
+                        border: "2.5px solid white", marginLeft: i > 0 ? -10 : 0,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontFamily: outfit, fontWeight: 700, fontSize: 13, color: "#fff",
+                        overflow: "hidden", flexShrink: 0,
+                      }}>
+                        {u.profile_picture_url
+                          ? <img src={u.profile_picture_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          : (u.name?.[0]?.toUpperCase() ?? "?")
+                        }
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ fontFamily: jakarta, fontSize: 13.5, color: C.muted }}>
+                  {confirmedPassengers.length === 1
+                    ? <><strong style={{ color: C.ink }}>{confirmedPassengers[0].user?.name?.split(" ")[0] ?? "Alguém"}</strong> já reservou</>
+                    : <><strong style={{ color: C.ink }}>{confirmedPassengers.slice(0, 2).map(b => b.user?.name?.split(" ")[0] ?? "?").join(" e ")}</strong> {confirmedPassengers.length > 2 ? `e mais ${confirmedPassengers.length - 2} ` : ""}já reservaram</>
+                  }
+                </div>
+              </div>
             )}
-            {ride.status === "active" && (
-              <button
-                onClick={() => changeStatus("completed")}
-                disabled={actionLoading}
-                className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white hover:bg-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Concluir
-              </button>
+
+            {ride.automatic_approval && (
+              <div style={{
+                background: C.bgCool, borderRadius: 16, border: `1px solid #BFDBFE`,
+                padding: "14px 18px", display: "flex", alignItems: "center", gap: 10,
+              }}>
+                <Icon d={ICONS.shield} size={16} color={C.blue} />
+                <span style={{ fontFamily: jakarta, fontSize: 13, color: C.navy, fontWeight: 500 }}>
+                  Aprovação automática ativada
+                </span>
+              </div>
             )}
-            <button
-              onClick={() => changeStatus("cancelled")}
-              disabled={actionLoading}
-              className="flex-1 rounded-xl border border-red-200 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar
-            </button>
           </div>
         </div>
-      )}
-    </main>
+      </div>
+    </div>
   );
 }

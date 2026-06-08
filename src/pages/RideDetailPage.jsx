@@ -469,6 +469,22 @@ export default function RideDetailPage() {
     }
   }
 
+  async function handleBookingStatus(bookingId, status) {
+    setActionLoading(true);
+    try {
+      await api(`/bookings/${bookingId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status })
+      });
+      swal.successToast("Status da reserva atualizado!");
+      await loadAll();
+    } catch (error) {
+      swal.error("Erro", "Não foi possível atualizar a reserva.");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
   if (loading) {
     return (
       <div
@@ -565,7 +581,11 @@ export default function RideDetailPage() {
   const destShort = ride.destination_address?.split(",")[0] ?? "Destino";
 
   const confirmedPassengers = activeBookings.filter(
-    (b) => b.status === "confirmed" || b.status === "pending",
+    (b) => String(b.status).toLowerCase() === "confirmed" || String(b.status).toLowerCase() === "pending",
+  );
+
+  const pendingRequests = bookings.filter(
+    (b) => String(b.status).toLowerCase() === "pending"
   );
 
   const STATUS_LABEL = {
@@ -1139,93 +1159,117 @@ export default function RideDetailPage() {
               </div>
             )}
 
-            {isDriver &&
-              ride.status !== "completed" &&
-              ride.status !== "cancelled" && (
+            {/* NOVO: PAINEL DO MOTORISTA - SOLICITAÇÕES PENDENTES */}
+            {isDriver && pendingRequests.length > 0 && (
+              <div
+                style={{
+                  background: C.surface,
+                  borderRadius: 20,
+                  border: `1px solid ${C.border}`,
+                  padding: "24px",
+                }}
+              >
                 <div
                   style={{
-                    background: C.surface,
-                    borderRadius: 20,
-                    border: `1px solid ${C.border}`,
-                    padding: "24px",
+                    fontFamily: outfit,
+                    fontWeight: 700,
+                    fontSize: 19,
+                    color: C.ink,
+                    marginBottom: 16,
                   }}
                 >
-                  <div
-                    style={{
-                      fontFamily: outfit,
-                      fontWeight: 700,
-                      fontSize: 16,
-                      color: C.navy,
-                      marginBottom: 16,
-                    }}
-                  >
-                    Gerenciar carona
-                  </div>
-                  <div style={{ display: "flex", gap: 12 }}>
-                    {ride.status === "pending" && (
-                      <button
-                        onClick={() => changeStatus("active")}
-                        disabled={actionLoading}
-                        style={{
-                          flex: 1,
-                          height: 48,
-                          borderRadius: 12,
-                          background: C.blue,
-                          color: "#fff",
-                          fontFamily: jakarta,
-                          fontWeight: 700,
-                          fontSize: 14,
-                          border: "none",
-                          cursor: "pointer",
-                          opacity: actionLoading ? 0.5 : 1,
-                        }}
-                      >
-                        Iniciar carona
-                      </button>
-                    )}
-                    {ride.status === "active" && (
-                      <button
-                        onClick={() => changeStatus("completed")}
-                        disabled={actionLoading}
-                        style={{
-                          flex: 1,
-                          height: 48,
-                          borderRadius: 12,
-                          background: C.green,
-                          color: "#fff",
-                          fontFamily: jakarta,
-                          fontWeight: 700,
-                          fontSize: 14,
-                          border: "none",
-                          cursor: "pointer",
-                          opacity: actionLoading ? 0.5 : 1,
-                        }}
-                      >
-                        Concluir carona
-                      </button>
-                    )}
-                    <button
-                      onClick={() => changeStatus("cancelled")}
-                      disabled={actionLoading}
+                  Solicitações Pendentes
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {pendingRequests.map(booking => (
+                    <div
+                      key={booking.id}
                       style={{
-                        flex: 1,
-                        height: 48,
-                        borderRadius: 12,
-                        border: "1.5px solid #FECACA",
-                        background: "#FEF2F2",
-                        color: "#DC2626",
-                        fontFamily: jakarta,
-                        fontWeight: 700,
-                        fontSize: 14,
-                        cursor: "pointer",
-                        opacity: actionLoading ? 0.5 : 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingBottom: 16,
+                        borderBottom: `1px solid ${C.border}`,
+                        flexWrap: "wrap",
+                        gap: 12
                       }}
                     >
-                      Cancelar
-                    </button>
-                  </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            background: C.bgCool,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontFamily: outfit,
+                            fontWeight: 700,
+                            fontSize: 14,
+                            color: C.blue,
+                            overflow: "hidden"
+                          }}
+                        >
+                          {booking.user?.profile_picture_url ? (
+                            <img src={booking.user.profile_picture_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            booking.user?.name?.charAt(0).toUpperCase() || "?"
+                          )}
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: jakarta, fontWeight: 700, fontSize: 15, color: C.ink }}>
+                            {booking.user?.name || "Passageiro"}
+                          </div>
+                          <div style={{ fontFamily: jakarta, fontSize: 13, color: C.muted }}>
+                            solicitou {booking.seats_booked} vaga{booking.seats_booked !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          onClick={() => handleBookingStatus(booking.id, 'REJECTED')}
+                          disabled={actionLoading}
+                          style={{
+                            padding: "8px 16px",
+                            borderRadius: 10,
+                            background: "#FEF2F2",
+                            border: "1.5px solid #FECACA",
+                            color: "#DC2626",
+                            fontFamily: jakarta,
+                            fontWeight: 600,
+                            fontSize: 13,
+                            cursor: actionLoading ? "not-allowed" : "pointer",
+                            opacity: actionLoading ? 0.6 : 1
+                          }}
+                        >
+                          Recusar
+                        </button>
+                        <button
+                          onClick={() => handleBookingStatus(booking.id, 'CONFIRMED')}
+                          disabled={actionLoading}
+                          style={{
+                            padding: "8px 16px",
+                            borderRadius: 10,
+                            background: C.green,
+                            border: "none",
+                            color: "#fff",
+                            fontFamily: jakarta,
+                            fontWeight: 600,
+                            fontSize: 13,
+                            cursor: actionLoading ? "not-allowed" : "pointer",
+                            opacity: actionLoading ? 0.6 : 1
+                          }}
+                        >
+                          Aceitar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
           </div>
 
           <div
@@ -1679,6 +1723,95 @@ export default function RideDetailPage() {
                 </span>
               </div>
             )}
+
+            {/* NOVO: PAINEL DO MOTORISTA - GERENCIAR CARONA (Movido para a sidebar) */}
+            {isDriver &&
+              ride.status !== "completed" &&
+              ride.status !== "cancelled" && (
+                <div
+                  style={{
+                    background: C.surface,
+                    borderRadius: 20,
+                    border: `1px solid ${C.border}`,
+                    padding: "24px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: outfit,
+                      fontWeight: 700,
+                      fontSize: 16,
+                      color: C.navy,
+                      marginBottom: 16,
+                    }}
+                  >
+                    Gerenciar status da carona
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {ride.status === "pending" && (
+                      <button
+                        onClick={() => changeStatus("active")}
+                        disabled={actionLoading}
+                        style={{
+                          width: "100%",
+                          height: 48,
+                          borderRadius: 12,
+                          background: C.blue,
+                          color: "#fff",
+                          fontFamily: jakarta,
+                          fontWeight: 700,
+                          fontSize: 14,
+                          border: "none",
+                          cursor: "pointer",
+                          opacity: actionLoading ? 0.5 : 1,
+                        }}
+                      >
+                        Iniciar carona
+                      </button>
+                    )}
+                    {ride.status === "active" && (
+                      <button
+                        onClick={() => changeStatus("completed")}
+                        disabled={actionLoading}
+                        style={{
+                          width: "100%",
+                          height: 48,
+                          borderRadius: 12,
+                          background: C.green,
+                          color: "#fff",
+                          fontFamily: jakarta,
+                          fontWeight: 700,
+                          fontSize: 14,
+                          border: "none",
+                          cursor: "pointer",
+                          opacity: actionLoading ? 0.5 : 1,
+                        }}
+                      >
+                        Concluir carona
+                      </button>
+                    )}
+                    <button
+                      onClick={() => changeStatus("cancelled")}
+                      disabled={actionLoading}
+                      style={{
+                        width: "100%",
+                        height: 48,
+                        borderRadius: 12,
+                        border: "1.5px solid #FECACA",
+                        background: "#FEF2F2",
+                        color: "#DC2626",
+                        fontFamily: jakarta,
+                        fontWeight: 700,
+                        fontSize: 14,
+                        cursor: "pointer",
+                        opacity: actionLoading ? 0.5 : 1,
+                      }}
+                    >
+                      Cancelar Carona
+                    </button>
+                  </div>
+                </div>
+              )}
           </div>
         </div>
       </div>

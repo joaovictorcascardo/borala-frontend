@@ -18,6 +18,7 @@ import CreateRidePage from "../pages/CreateRidePage";
 import RidesPage from "../pages/RidesPage";
 import RideDetailPage from "../pages/RideDetailPage";
 import MyRidesPage from "../pages/MyRidesPage";
+import MyBookingsPage from "../pages/MyBookingsPage";
 
 export function AppRoutes() {
   return (
@@ -45,6 +46,7 @@ export function AppRoutes() {
             <Route path="/rides" element={<RidesPage />} />
             <Route path="/rides/:id" element={<RideDetailPage />} />
             <Route path="/my-rides" element={<MyRidesPage />} />
+            <Route path="/my-bookings" element={<MyBookingsPage />} />
           </Route>
         </Route>
       </Routes>

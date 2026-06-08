@@ -4,13 +4,21 @@ import { api } from "../services/api";
 import { swal } from "../lib/swal";
 
 const STATUS_LABEL = {
-  pending: "Aguardando",
+  SCHEDULED: "Agendada",
+  IN_PROGRESS: "Em andamento",
+  COMPLETED: "Concluída",
+  CANCELLED: "Cancelada",
+  pending: "Agendada",
   active: "Em andamento",
   completed: "Concluída",
   cancelled: "Cancelada",
 };
 
 const STATUS_STYLE = {
+  SCHEDULED: "text-amber-600 bg-amber-50 border-amber-200",
+  IN_PROGRESS: "text-blue-600 bg-blue-50 border-blue-200",
+  COMPLETED: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  CANCELLED: "text-red-500 bg-red-50 border-red-200",
   pending: "text-amber-600 bg-amber-50 border-amber-200",
   active: "text-blue-600 bg-blue-50 border-blue-200",
   completed: "text-emerald-600 bg-emerald-50 border-emerald-200",
@@ -47,11 +55,18 @@ export default function MyRidesPage() {
     );
     if (!isConfirmed) return;
 
+    const statusMap = {
+      active: "IN_PROGRESS",
+      completed: "COMPLETED",
+      cancelled: "CANCELLED",
+    };
+    const apiStatus = statusMap[status] || status;
+
     setUpdatingId(rideId);
     try {
       await api(`/rides/${rideId}/status`, {
         method: "PATCH",
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status: apiStatus }),
       });
       await loadRides();
       swal.successToast("Status atualizado!");
@@ -125,35 +140,43 @@ export default function MyRidesPage() {
                   )}
                 </div>
 
-                {(ride.status === "pending" || ride.status === "active") && (
-                  <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-                    {ride.status === "pending" && (
+                {(() => {
+                  const statusLower = String(ride.status || "").toLowerCase();
+                  const isPending = statusLower === "pending" || statusLower === "scheduled";
+                  const isActive = statusLower === "active" || statusLower === "in_progress";
+
+                  if (!isPending && !isActive) return null;
+
+                  return (
+                    <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
+                      {isPending && (
+                        <button
+                          onClick={() => changeStatus(ride.id, "active")}
+                          disabled={busy}
+                          className="button-primary text-xs px-3 py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Iniciar
+                        </button>
+                      )}
+                      {isActive && (
+                        <button
+                          onClick={() => changeStatus(ride.id, "completed")}
+                          disabled={busy}
+                          className="inline-flex items-center justify-center rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Concluir
+                        </button>
+                      )}
                       <button
-                        onClick={() => changeStatus(ride.id, "active")}
+                        onClick={() => changeStatus(ride.id, "cancelled")}
                         disabled={busy}
-                        className="button-primary text-xs px-3 py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center justify-center rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Iniciar
+                        Cancelar
                       </button>
-                    )}
-                    {ride.status === "active" && (
-                      <button
-                        onClick={() => changeStatus(ride.id, "completed")}
-                        disabled={busy}
-                        className="inline-flex items-center justify-center rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Concluir
-                      </button>
-                    )}
-                    <button
-                      onClick={() => changeStatus(ride.id, "cancelled")}
-                      disabled={busy}
-                      className="inline-flex items-center justify-center rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                )}
+                    </div>
+                  );
+                })()}
               </li>
             );
           })}

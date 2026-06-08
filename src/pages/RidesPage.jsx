@@ -3,13 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 const STATUS_LABEL = {
-  pending: "Aguardando",
+  SCHEDULED: "Agendada",
+  IN_PROGRESS: "Em andamento",
+  COMPLETED: "Concluída",
+  CANCELLED: "Cancelada",
+  pending: "Agendada",
   active: "Em andamento",
   completed: "Concluída",
   cancelled: "Cancelada",
 };
 
 const STATUS_STYLE = {
+  SCHEDULED: "text-amber-600 bg-amber-50 border-amber-200",
+  IN_PROGRESS: "text-blue-600 bg-blue-50 border-blue-200",
+  COMPLETED: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  CANCELLED: "text-red-500 bg-red-50 border-red-200",
   pending: "text-amber-600 bg-amber-50 border-amber-200",
   active: "text-blue-600 bg-blue-50 border-blue-200",
   completed: "text-emerald-600 bg-emerald-50 border-emerald-200",
@@ -51,6 +59,7 @@ export default function RidesPage() {
     setLoading(true);
     try {
       const qs = new URLSearchParams();
+      qs.set("limit", "100"); // Define um limite alto para trazer todas as caronas
       if (filters.origin) qs.set("origin", filters.origin);
       if (filters.destination) qs.set("destination", filters.destination);
       if (filters.date) qs.set("date", filters.date);

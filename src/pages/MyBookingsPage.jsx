@@ -1,17 +1,34 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { swal } from "../lib/swal";
 
+const STATUS_LABEL = {
+  PENDING: "Aguardando aprovação",
+  CONFIRMED: "Confirmada",
+  CANCELLED: "Cancelada",
+  REJECTED: "Recusada",
+};
+
+const STATUS_STYLE = {
+  PENDING: "text-amber-600 bg-amber-50 border-amber-200",
+  CONFIRMED: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  CANCELLED: "text-slate-400 bg-slate-50 border-slate-200",
+  REJECTED: "text-red-500 bg-red-50 border-red-200",
+};
+
 export default function MyBookingsPage() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
 
   async function loadBookings() {
     try {
       const data = await api("/bookings/me");
       setBookings(Array.isArray(data) ? data : []);
-    } catch (error) {
-      swal.error(error.message || "Erro ao carregar reservas.");
+    } catch (err) {
+      swal.error(err.message || "Erro ao carregar reservas.");
     } finally {
       setLoading(false);
     }
@@ -22,87 +39,123 @@ export default function MyBookingsPage() {
   }, []);
 
   async function handleCancel(bookingId) {
-    if (window.confirm("Deseja mesmo cancelar essa reserva?")) {
-      try {
-        await api(`/bookings/${bookingId}`, { method: "DELETE" });
-        alert("Reserva cancelada!");
-        loadBookings();
-      } catch (error) {
-        alert("Erro: " + error.message);
-      }
+    const { isConfirmed } = await swal.confirm(
+      "Cancelar reserva?",
+      "Esta ação não pode ser desfeita.",
+      { confirmText: "Cancelar reserva", danger: true }
+    );
+    if (!isConfirmed) return;
+
+    setCancellingId(bookingId);
+    try {
+      await api(`/bookings/${bookingId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      swal.successToast("Reserva cancelada.");
+      loadBookings();
+    } catch (err) {
+      swal.error(err.message || "Não foi possível cancelar a reserva.");
+    } finally {
+      setCancellingId(null);
     }
   }
 
   if (loading) {
-    return <div style={{ padding: "20px" }}>Carregando...</div>;
+    return (
+      <div className="flex justify-center py-24">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Minhas Reservas</h1>
-      <p>Aqui você vê as caronas que você reservou:</p>
+    <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-white p-8 shadow-[0_4px_20px_rgba(37,99,235,0.10)]">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-400/10 blur-[60px] pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" />
+        <p className="relative text-xs font-bold uppercase tracking-[0.3em] text-blue-600">Passageiro</p>
+        <h1 className="relative mt-2 text-3xl font-bold text-slate-900">Minhas Reservas</h1>
+        <p className="relative mt-2 text-slate-500">Caronas que você reservou como passageiro.</p>
+      </div>
+
+      {/* Lista vazia */}
       {bookings.length === 0 ? (
-        <p>Você não tem nenhuma reserva.</p>
+        <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
+          <p className="text-slate-500 mb-5">Você ainda não tem nenhuma reserva.</p>
+          <button onClick={() => navigate("/rides")} className="button-primary">
+            Buscar caronas
+          </button>
+        </div>
       ) : (
-        <div>
+        <ul className="space-y-4">
           {bookings.map((booking) => {
             const ride = booking.ride || {};
-            const driver = ride.driver || ride.user || {};
-            return (
-              <div
-                key={booking.id}
-                style={{
-                  border: "1px solid black",
-                  padding: "10px",
-                  margin: "10px 0",
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <p>
-                  <strong>Origem:</strong> {ride.origin_address}
-                </p>
-                <p>
-                  <strong>Destino:</strong> {ride.destination_address}
-                </p>
-                <p>
-                  <strong>Data:</strong> {ride.departure_time ? new Date(ride.departure_time).toLocaleString() : "Não informada"}
-                </p>
-                <p>
-                  <strong>Vagas:</strong> {booking.seats_booked}
-                </p>
-                <p>
-                  <strong>Motorista:</strong> {driver.name || "Não informado"}
-                </p>
-                <p>
-                  <strong>Preço:</strong> R$ {ride.estimated_total_cost || "0.00"}
-                </p>
-                <p>
-                  <strong>Status:</strong> {booking.status}
-                </p>
+            const statusUpper = String(booking.status || "").toUpperCase();
+            const busy = cancellingId === booking.id;
+            const canCancel = statusUpper === "PENDING" || statusUpper === "CONFIRMED";
 
-                {(booking.status === "PENDING" ||
-                  booking.status === "CONFIRMED" ||
-                  booking.status === "pending" ||
-                  booking.status === "confirmed") && (
+            return (
+              <li key={booking.id}
+                className="rounded-2xl border border-blue-100 bg-white p-5 shadow-[0_2px_8px_rgba(37,99,235,0.06)]">
+
+                {/* Origem e destino */}
+                <div
+                  className="cursor-pointer mb-3"
+                  onClick={() => navigate(`/rides/${ride.id}`)}
+                >
+                  <p className="font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                    {ride.origin_address || "Endereço de origem"}
+                  </p>
+                  <p className="text-sm text-slate-500 mt-0.5">
+                    → {ride.destination_address || "Endereço de destino"}
+                  </p>
+                </div>
+
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {ride.departure_time && (
+                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-3 py-1">
+                      {new Date(ride.departure_time).toLocaleString("pt-BR", {
+                        day: "2-digit", month: "short",
+                        hour: "2-digit", minute: "2-digit",
+                      })}
+                    </span>
+                  )}
+                  <span className="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-full px-3 py-1">
+                    {booking.seats_booked} vaga{booking.seats_booked !== 1 ? "s" : ""}
+                  </span>
+                  <span className={`text-xs font-semibold border rounded-full px-3 py-1 ${STATUS_STYLE[statusUpper] ?? "text-slate-600 bg-slate-50 border-slate-200"}`}>
+                    {STATUS_LABEL[statusUpper] ?? booking.status}
+                  </span>
+                </div>
+
+                {/* Ações */}
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
                   <button
-                    onClick={() => handleCancel(booking.id)}
-                    style={{
-                      backgroundColor: "red",
-                      color: "white",
-                      padding: "5px 10px",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
+                    onClick={() => navigate(`/rides/${ride.id}`)}
+                    className="inline-flex items-center justify-center rounded-xl border border-blue-200 px-4 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
                   >
-                    Cancelar Reserva
+                    Ver carona
                   </button>
-                )}
-              </div>
+
+                  {canCancel && (
+                    <button
+                      onClick={() => handleCancel(booking.id)}
+                      disabled={busy}
+                      className="inline-flex items-center justify-center rounded-xl border border-red-200 px-4 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {busy ? "Cancelando..." : "Cancelar reserva"}
+                    </button>
+                  )}
+                </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
-    </div>
+    </main>
   );
 }

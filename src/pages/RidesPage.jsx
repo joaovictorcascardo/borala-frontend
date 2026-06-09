@@ -201,19 +201,10 @@ export default function RidesPage() {
                 </div>
 
                 {!isDriver && ride.available_seats > 0 && (
-                  <div style={{ marginTop: "12px", borderTop: "1px solid #f1f5f9", paddingTop: "10px" }}>
+                  <div className="mt-3 pt-3 border-t border-slate-100">
                     <button
                       onClick={(e) => handleBookRide(e, ride.id)}
-                      style={{
-                        padding: "6px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#2563eb",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                      }}
+                      className="inline-flex items-center justify-center rounded-xl border border-blue-200 px-4 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
                     >
                       Solicitar Vaga
                     </button>

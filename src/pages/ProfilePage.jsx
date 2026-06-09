@@ -173,31 +173,33 @@ export default function ProfilePage() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
-        <h3 className="text-lg font-bold text-slate-800 mb-5">
-          Avaliações recebidas
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-lg font-bold text-slate-800">Avaliações recebidas</h3>
           {reviews.length > 0 && (
-            <span className="ml-2 text-sm font-normal text-slate-400">({reviews.length})</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-50 border border-blue-100 rounded-full px-3 py-1">
+              {reviews.length} {reviews.length === 1 ? "avaliação" : "avaliações"}
+            </span>
           )}
-        </h3>
+        </div>
 
         {reviews.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-6">Você ainda não recebeu nenhuma avaliação.</p>
+          <div className="bg-blue-50/60 rounded-xl border border-blue-100 px-4 py-6 text-center">
+            <p className="text-sm text-slate-400">Você ainda não recebeu nenhuma avaliação.</p>
+          </div>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-3">
             {reviews.map((rev, i) => (
-              <li key={i} className="border border-slate-100 rounded-xl p-4">
-                <div className="flex items-center gap-1 mb-2">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <svg key={n} xmlns="http://www.w3.org/2000/svg"
-                      className={`w-4 h-4 ${n <= rev.rating ? "text-amber-400" : "text-slate-200"}`}
-                      viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                  <span className="ml-1 text-sm font-semibold text-slate-700">{rev.rating}/5</span>
+              <li key={i} className="bg-blue-50/60 rounded-xl border border-blue-100 p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm tracking-tight">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <span key={n} className={n <= rev.rating ? "text-amber-400" : "text-slate-200"}>★</span>
+                    ))}
+                  </span>
+                  <span className="text-sm font-semibold text-slate-700">{Number(rev.rating).toFixed(1)}</span>
                 </div>
                 {rev.comment && (
-                  <p className="text-sm text-slate-600">"{rev.comment}"</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">"{rev.comment}"</p>
                 )}
               </li>
             ))}

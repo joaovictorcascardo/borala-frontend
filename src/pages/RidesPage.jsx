@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { swal } from "../lib/swal";
 
 const STATUS_LABEL = {
   SCHEDULED: "Agendada",
@@ -38,20 +39,24 @@ export default function RidesPage() {
   })();
 
   async function handleBookRide(e, rideId) {
-    e.stopPropagation(); // Evita que o clique no card navegue para os detalhes da carona
+    e.stopPropagation();
 
-    const confirmBook = window.confirm("Deseja solicitar uma vaga nesta carona?");
-    if (!confirmBook) return;
+    const { isConfirmed } = await swal.confirm(
+      "Solicitar vaga?",
+      "Sua solicitação será enviada ao motorista.",
+      { confirmText: "Solicitar" }
+    );
+    if (!isConfirmed) return;
 
     try {
       await api(`/rides/${rideId}/bookings`, {
         method: "POST",
         body: JSON.stringify({ seats_booked: 1 })
       });
-      alert("Solicitação de vaga enviada com sucesso!");
-      fetchRides({ origin, destination, date, maxCost }); // Recarrega com os filtros atuais
+      swal.successToast("Solicitação enviada com sucesso!");
+      fetchRides({ origin, destination, date, maxCost });
     } catch (error) {
-      alert(error.message || "Erro ao solicitar vaga.");
+      swal.error(error.message || "Erro ao solicitar vaga.");
     }
   }
 

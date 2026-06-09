@@ -287,6 +287,7 @@ export default function RideDetailPage() {
   const [driverInfo, setDriverInfo] = useState(null);
   const [myBooking, setMyBooking] = useState(null);
   const [rideBookings, setRideBookings] = useState([]);
+  const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [seatCount, setSeatCount] = useState(1);
@@ -301,11 +302,13 @@ export default function RideDetailPage() {
       setRide(rideData);
       const userIsDriver = currentUser?.id === rideData.driver_id;
 
-      const [driverData, bookingsData, rideBookingsData] = await Promise.all([
+      const [driverData, bookingsData, rideBookingsData, metricsData] = await Promise.all([
         rideData.driver_id ? api(`/users/${rideData.driver_id}`).catch(() => null) : Promise.resolve(null),
         userIsDriver ? Promise.resolve([]) : api("/bookings/me").catch(() => []),
         userIsDriver ? api(`/rides/${id}/bookings`).catch(() => []) : Promise.resolve([]),
+        api(`/rides/${id}/metrics`).catch(() => null),
       ]);
+      setMetrics(metricsData);
 
       setDriverInfo(driverData);
       setRideBookings(Array.isArray(rideBookingsData) ? rideBookingsData : []);
@@ -554,9 +557,23 @@ export default function RideDetailPage() {
             <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`,
               padding: "20px 24px", display: "flex", gap: 0 }}>
               {[
-                { icon: "clock", value: "~1h20", label: "Duração estimada" },
-                { icon: "route", value: "~98 km", label: "Distância" },
-                { icon: "leaf", value: "−12 kg", label: "CO₂ evitado" },
+                {
+                  icon: "clock",
+                  value: metrics?.duration_minutes
+                    ? `${Math.floor(metrics.duration_minutes / 60)}h${String(metrics.duration_minutes % 60).padStart(2, "0")}`
+                    : "—",
+                  label: "Duração estimada",
+                },
+                {
+                  icon: "route",
+                  value: metrics?.distance_km ? `${metrics.distance_km} km` : "—",
+                  label: "Distância",
+                },
+                {
+                  icon: "leaf",
+                  value: metrics?.co2_saved_kg ? `−${metrics.co2_saved_kg} kg` : "—",
+                  label: "CO₂ evitado",
+                },
               ].map((m, i) => (
                 <div key={i} style={{ display: "flex", flex: 1, alignItems: "stretch" }}>
                   {i > 0 && <div style={{ width: 1, background: C.border, margin: "0 20px", flexShrink: 0 }} />}
@@ -628,22 +645,20 @@ export default function RideDetailPage() {
                   </div>
                 </div>
                 <div style={{ borderTop: `1px solid ${C.border}`, margin: "20px 0" }} />
-                <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ width: 52, height: 52, borderRadius: 12, background: C.bgCool,
                     display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <Icon d={ICONS.car} size={24} color={C.blue} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: jakarta, fontWeight: 700, fontSize: 15.5, color: C.ink }}>
+                  <div>
+                    <div style={{ fontFamily: jakarta, fontWeight: 700, fontSize: 15, color: C.ink }}>
                       Veículo cadastrado
                     </div>
-                    <div style={{ fontFamily: jakarta, fontSize: 13, color: C.faint, marginTop: 2 }}>
-                      Ver perfil do motorista
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    <AmenityChip icon="wind" label="Ar-condicionado" />
-                    <AmenityChip icon="noSmoking" label="Não fumante" />
+                    <button onClick={() => navigate(`/users/${driverInfo.id}`)}
+                      style={{ fontFamily: jakarta, fontSize: 13, color: C.blue, fontWeight: 600,
+                        background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 2 }}>
+                      Ver perfil do motorista →
+                    </button>
                   </div>
                 </div>
               </div>

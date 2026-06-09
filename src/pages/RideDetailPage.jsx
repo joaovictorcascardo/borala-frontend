@@ -311,7 +311,7 @@ export default function RideDetailPage() {
       setRideBookings(Array.isArray(rideBookingsData) ? rideBookingsData : []);
 
       const found = Array.isArray(bookingsData)
-        ? bookingsData.find((b) => b.ride?.id === Number(id)) ?? null
+        ? bookingsData.find((b) => Number(b.ride?.id) === Number(id)) ?? null
         : null;
       setMyBooking(found);
     } catch {
@@ -650,7 +650,7 @@ export default function RideDetailPage() {
             )}
 
             {/* Seção de avaliação — passageiro confirma após carona concluída */}
-            {isCompleted && !isDriver && activeMyBooking && bStatus === "CONFIRMED" && (
+            {!isDriver && activeMyBooking && bStatus === "CONFIRMED" && (
               <ReviewSection
                 rideId={id}
                 revieweeId={ride.driver_id}

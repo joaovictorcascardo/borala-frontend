@@ -15,6 +15,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -25,6 +26,9 @@ export default function ProfilePage() {
         setPhone(response.phone ? String(response.phone) : "");
         setBio(response.bio || "");
         setAvatarUrl(response.profile_picture_url || null);
+
+        const rev = await api(`/users/${response.id}/reviews?page=1&limit=20`).catch(() => []);
+        setReviews(Array.isArray(rev) ? rev : []);
       } catch {
         await swal.error("Não foi possível carregar os dados do perfil.", "Erro ao carregar");
         navigate("/");
@@ -166,6 +170,39 @@ export default function ProfilePage() {
           <Input id="bio" label="Bio" type="text" value={bio} onChange={(e) => setBio(e.target.value)} />
           <Button type="submit" text={saving ? "Salvando..." : "Salvar alterações"} disabled={saving} />
         </form>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+        <h3 className="text-lg font-bold text-slate-800 mb-5">
+          Avaliações recebidas
+          {reviews.length > 0 && (
+            <span className="ml-2 text-sm font-normal text-slate-400">({reviews.length})</span>
+          )}
+        </h3>
+
+        {reviews.length === 0 ? (
+          <p className="text-sm text-slate-400 text-center py-6">Você ainda não recebeu nenhuma avaliação.</p>
+        ) : (
+          <ul className="space-y-4">
+            {reviews.map((rev, i) => (
+              <li key={i} className="border border-slate-100 rounded-xl p-4">
+                <div className="flex items-center gap-1 mb-2">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <svg key={n} xmlns="http://www.w3.org/2000/svg"
+                      className={`w-4 h-4 ${n <= rev.rating ? "text-amber-400" : "text-slate-200"}`}
+                      viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                  <span className="ml-1 text-sm font-semibold text-slate-700">{rev.rating}/5</span>
+                </div>
+                {rev.comment && (
+                  <p className="text-sm text-slate-600">"{rev.comment}"</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </main>
   );

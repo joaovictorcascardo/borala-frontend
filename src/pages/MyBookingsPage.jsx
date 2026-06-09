@@ -141,6 +141,15 @@ export default function MyBookingsPage() {
                     Ver carona
                   </button>
 
+                  {statusUpper === "CONFIRMED" && (
+                    <button
+                      onClick={() => navigate(`/rides/${ride.id}`)}
+                      className="inline-flex items-center justify-center rounded-xl border border-amber-200 px-4 py-1.5 text-xs font-semibold text-amber-600 hover:bg-amber-50 transition-all duration-200 cursor-pointer"
+                    >
+                      ★ Avaliar motorista
+                    </button>
+                  )}
+
                   {canCancel && (
                     <button
                       onClick={() => handleCancel(booking.id)}

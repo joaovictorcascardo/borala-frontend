@@ -286,6 +286,7 @@ export default function RideDetailPage() {
   const [ride, setRide] = useState(null);
   const [driverInfo, setDriverInfo] = useState(null);
   const [myBooking, setMyBooking] = useState(null);
+  const [rideBookings, setRideBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [seatCount, setSeatCount] = useState(1);
@@ -298,13 +299,16 @@ export default function RideDetailPage() {
     try {
       const rideData = await api(`/rides/${id}`);
       setRide(rideData);
+      const userIsDriver = currentUser?.id === rideData.driver_id;
 
-      const [driverData, bookingsData] = await Promise.all([
+      const [driverData, bookingsData, rideBookingsData] = await Promise.all([
         rideData.driver_id ? api(`/users/${rideData.driver_id}`).catch(() => null) : Promise.resolve(null),
-        api("/bookings/me").catch(() => []),
+        userIsDriver ? Promise.resolve([]) : api("/bookings/me").catch(() => []),
+        userIsDriver ? api(`/rides/${id}/bookings`).catch(() => []) : Promise.resolve([]),
       ]);
 
       setDriverInfo(driverData);
+      setRideBookings(Array.isArray(rideBookingsData) ? rideBookingsData : []);
 
       const found = Array.isArray(bookingsData)
         ? bookingsData.find((b) => b.ride?.id === Number(id)) ?? null
@@ -314,6 +318,29 @@ export default function RideDetailPage() {
       setRide(null);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleBookingAction(bookingId, newStatus) {
+    const label = newStatus === "CONFIRMED" ? "confirmar" : "recusar";
+    const { isConfirmed } = await swal.confirm(
+      `Deseja ${label} esta solicitação?`, "",
+      { confirmText: newStatus === "CONFIRMED" ? "Confirmar" : "Recusar",
+        danger: newStatus === "REJECTED" }
+    );
+    if (!isConfirmed) return;
+    setActionLoading(true);
+    try {
+      await api(`/bookings/${bookingId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus }),
+      });
+      await loadAll();
+      swal.successToast(newStatus === "CONFIRMED" ? "Passageiro confirmado!" : "Solicitação recusada.");
+    } catch (err) {
+      swal.error(err.message || "Não foi possível atualizar a solicitação.");
+    } finally {
+      setActionLoading(false);
     }
   }
 
@@ -799,6 +826,69 @@ export default function RideDetailPage() {
                       cursor: "pointer", opacity: actionLoading ? 0.5 : 1 }}>
                     Cancelar Carona
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* Solicitações de passageiros — só motorista vê */}
+            {isDriver && rideBookings.length > 0 && (
+              <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
+                <div style={{ fontFamily: outfit, fontWeight: 700, fontSize: 16, color: C.navy, marginBottom: 16 }}>
+                  Passageiros ({rideBookings.length})
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {rideBookings.map((bk) => {
+                    const bkStatus = String(bk.status || "").toUpperCase();
+                    const initials = bk.user?.name?.split(" ").slice(0, 2).map((n) => n[0]).join("") ?? "?";
+                    return (
+                      <div key={bk.id} style={{ borderRadius: 14, border: `1px solid ${C.border}`,
+                        padding: "12px 14px", background: C.bg }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: "50%", background: C.gradient,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontFamily: outfit, fontWeight: 700, fontSize: 14, color: "#fff",
+                            flexShrink: 0, overflow: "hidden" }}>
+                            {bk.user?.profile_picture_url
+                              ? <img src={bk.user.profile_picture_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              : initials}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontFamily: jakarta, fontWeight: 700, fontSize: 14, color: C.ink,
+                              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {bk.user?.name ?? "Passageiro"}
+                            </div>
+                            <div style={{ fontFamily: jakarta, fontSize: 12, color: C.faint }}>
+                              {bk.seats_booked} vaga{bk.seats_booked !== 1 ? "s" : ""}
+                            </div>
+                          </div>
+                          <span style={{
+                            fontSize: 11, fontWeight: 700, fontFamily: jakarta,
+                            borderRadius: 20, padding: "3px 9px",
+                            background: bkStatus === "CONFIRMED" ? C.greenBg : bkStatus === "REJECTED" ? "#FEF2F2" : "#FFFBEB",
+                            color: bkStatus === "CONFIRMED" ? C.green : bkStatus === "REJECTED" ? "#DC2626" : "#D97706",
+                          }}>
+                            {bkStatus === "CONFIRMED" ? "Confirmado" : bkStatus === "REJECTED" ? "Recusado" : bkStatus === "CANCELLED" ? "Cancelado" : "Pendente"}
+                          </span>
+                        </div>
+                        {bkStatus === "PENDING" && (
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button onClick={() => handleBookingAction(bk.id, "CONFIRMED")} disabled={actionLoading}
+                              style={{ flex: 1, height: 36, borderRadius: 10, background: C.green,
+                                color: "#fff", fontFamily: jakarta, fontWeight: 700, fontSize: 13,
+                                border: "none", cursor: "pointer", opacity: actionLoading ? 0.5 : 1 }}>
+                              Aceitar
+                            </button>
+                            <button onClick={() => handleBookingAction(bk.id, "REJECTED")} disabled={actionLoading}
+                              style={{ flex: 1, height: 36, borderRadius: 10, background: "#FEF2F2",
+                                color: "#DC2626", fontFamily: jakarta, fontWeight: 700, fontSize: 13,
+                                border: "1.5px solid #FECACA", cursor: "pointer", opacity: actionLoading ? 0.5 : 1 }}>
+                              Recusar
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

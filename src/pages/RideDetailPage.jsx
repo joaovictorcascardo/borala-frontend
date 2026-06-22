@@ -451,7 +451,12 @@ export default function RideDetailPage() {
 
             <div style={{ borderRadius: 20, border: `1px solid ${C.border}`, overflow: "hidden",
               height: 320, background: "#E7EEF8", position: "relative" }}>
-              <RideRouteMap rideId={id} />
+              <RideRouteMap
+                originLat={ride.origin_latitude}
+                originLng={ride.origin_longitude}
+                destLat={ride.destination_latitude}
+                destLng={ride.destination_longitude}
+              />
               <div style={{ position: "absolute", bottom: 16, right: 16, zIndex: 1000,
                 background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)",
                 borderRadius: 12, padding: "10px 14px", boxShadow: "0 2px 12px rgba(0,0,0,0.12)" }}>

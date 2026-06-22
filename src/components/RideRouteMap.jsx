@@ -1,29 +1,44 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { api } from "../services/api";
 
 function FitRoute({ polyline }) {
   const map = useMap();
   useEffect(() => {
     if (polyline?.length) {
-      map.fitBounds(polyline, { padding: [28, 28] });
+      map.fitBounds(polyline, { padding: [32, 32] });
     }
   }, [polyline, map]);
   return null;
 }
 
-export function RideRouteMap({ rideId }) {
-  const [mapData, setMapData] = useState(null);
+export function RideRouteMap({ originLat, originLng, destLat, destLng }) {
+  const [polyline, setPolyline] = useState(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    setMapData(null);
+    if (!originLat || !originLng || !destLat || !destLng) {
+      setFailed(true);
+      return;
+    }
+
+    setPolyline(null);
     setFailed(false);
-    api.get(`/rides/${rideId}/map`)
-      .then(setMapData)
+
+    fetch(
+      `https://router.project-osrm.org/route/v1/driving/${originLng},${originLat};${destLng},${destLat}?overview=full&geometries=geojson`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.code !== "Ok" || !data.routes?.length) {
+          setFailed(true);
+          return;
+        }
+        const coords = data.routes[0].geometry.coordinates;
+        setPolyline(coords.map(([lng, lat]) => [lat, lng]));
+      })
       .catch(() => setFailed(true));
-  }, [rideId]);
+  }, [originLat, originLng, destLat, destLng]);
 
   if (failed) {
     return (
@@ -33,7 +48,7 @@ export function RideRouteMap({ rideId }) {
     );
   }
 
-  if (!mapData) {
+  if (!polyline) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-blue-50/60 rounded-[20px]">
         <div className="w-7 h-7 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -41,20 +56,18 @@ export function RideRouteMap({ rideId }) {
     );
   }
 
-  const center = [mapData.origin.lat, mapData.origin.lng];
-
   return (
     <MapContainer
-      center={center}
+      center={[originLat, originLng]}
       zoom={13}
       style={{ width: "100%", height: "100%", borderRadius: 20 }}
       zoomControl={false}
       attributionControl={false}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <Polyline positions={mapData.polyline} color="#2563eb" weight={4} opacity={0.85} />
+      <Polyline positions={polyline} color="#2563eb" weight={4} opacity={0.85} />
       <CircleMarker
-        center={[mapData.origin.lat, mapData.origin.lng]}
+        center={[originLat, originLng]}
         radius={9}
         color="#2563eb"
         fillColor="#ffffff"
@@ -64,7 +77,7 @@ export function RideRouteMap({ rideId }) {
         <Popup>Origem</Popup>
       </CircleMarker>
       <CircleMarker
-        center={[mapData.destination.lat, mapData.destination.lng]}
+        center={[destLat, destLng]}
         radius={9}
         color="#0f172a"
         fillColor="#0f172a"
@@ -73,7 +86,7 @@ export function RideRouteMap({ rideId }) {
       >
         <Popup>Destino</Popup>
       </CircleMarker>
-      <FitRoute polyline={mapData.polyline} />
+      <FitRoute polyline={polyline} />
     </MapContainer>
   );
 }

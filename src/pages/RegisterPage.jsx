@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
-import { useNavigate, Link, Navigate } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { swal } from "../lib/swal";
@@ -13,23 +13,16 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("");
   const navigate = useNavigate();
 
-  if (localStorage.getItem("@Borala:token")) {
-    return <Navigate to="/" replace />;
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const cleanPhone = phone.replace(/\D/g, "");
-      await api("/users", {
-        method: "POST",
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          birth_date: birthDate,
-          phone: Number(cleanPhone),
-        }),
+      await api.post("/users", {
+        name,
+        email,
+        password,
+        birth_date: birthDate,
+        phone: Number(cleanPhone),
       });
       await swal.success("Sua conta foi criada! Faça login para continuar.", "Bem-vindo ao Borala!");
       navigate("/login");

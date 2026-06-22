@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { api } from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
+import { api } from "../services/api";
+import { useAuth } from "../hooks/useAuth";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { swal } from "../lib/swal";
@@ -165,15 +166,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api("/authenticator/sessions", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-      localStorage.setItem("@Borala:token", response.token);
+      const response = await api.post("/authenticator/sessions", { email, password });
+      login(response.token, response.user ?? null);
       navigate("/");
     } catch (err) {
       swal.error(err.message || "E-mail ou senha inválidos.", "Acesso negado");

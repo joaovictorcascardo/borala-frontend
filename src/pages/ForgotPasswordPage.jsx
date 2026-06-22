@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { api } from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
+import { api } from "../services/api";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { swal } from "../lib/swal";
@@ -12,10 +12,7 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api("/authenticator/forgot-password", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
+      await api.post("/authenticator/forgot-password", { email });
       await swal.success(
         "Verifique sua caixa de entrada e siga as instruções.",
         "E-mail enviado!"

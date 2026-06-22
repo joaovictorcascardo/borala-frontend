@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { api } from "../services/api";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { api } from "../services/api";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { swal } from "../lib/swal";
@@ -21,13 +21,10 @@ export default function ResetPasswordPage() {
     }
 
     try {
-      await api("/authenticator/reset-password", {
-        method: "POST",
-        body: JSON.stringify({
-          token,
-          password,
-          password_confirmation: passwordConfirmation,
-        }),
+      await api.post("/authenticator/reset-password", {
+        token,
+        password,
+        password_confirmation: passwordConfirmation,
       });
       await swal.success("Sua senha foi alterada. Faça login com a nova senha.", "Senha redefinida!");
       navigate("/login");

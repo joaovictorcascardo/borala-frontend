@@ -11,6 +11,31 @@
   animation: skeleton-shimmer 1.4s ease infinite;
 }
 
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 9999;
+  padding: 6px 14px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transform: translateY(-140%);
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+*:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
 @theme {
   --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 

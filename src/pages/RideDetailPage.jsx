@@ -167,9 +167,11 @@ function ReviewSection({ rideId, revieweeId, revieweeName }) {
         A carona foi concluída. Deixe sua avaliação!
       </div>
 
-      <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+      <div role="group" aria-label="Nota de 1 a 5 estrelas" style={{ display: "flex", gap: 6, marginBottom: 8 }}>
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n}
+            aria-label={`${n} estrela${n > 1 ? "s" : ""}`}
+            aria-pressed={n <= rating}
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
             onClick={() => setRating(n)}
@@ -188,7 +190,11 @@ function ReviewSection({ rideId, revieweeId, revieweeName }) {
         </div>
       )}
 
+      <label htmlFor="review-comment" style={{ position: "absolute", left: "-9999px" }}>
+        Comentário da avaliação (opcional)
+      </label>
       <textarea
+        id="review-comment"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder="Comentário opcional (máx. 300 caracteres)..."
@@ -397,7 +403,7 @@ export default function RideDetailPage() {
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: jakarta }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px" }}>
 
-        <nav style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13.5,
+        <nav aria-label="Navegação" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13.5,
           color: C.faint, fontFamily: jakarta, marginBottom: 24, flexWrap: "wrap" }}>
           <span style={{ cursor: "pointer" }} onClick={() => navigate("/rides")}>Caronas</span>
           <span>/</span>
@@ -615,17 +621,21 @@ export default function RideDetailPage() {
                         {seatCount} assento{seatCount !== 1 ? "s" : ""}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <button onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
+                        <button
+                          onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
+                          aria-label="Diminuir número de assentos"
                           style={{ width: 34, height: 34, borderRadius: 10, border: `1.5px solid ${C.border}`,
                             background: C.bg, fontFamily: outfit, fontWeight: 700, fontSize: 18, color: C.ink,
                             display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                           −
                         </button>
-                        <span style={{ fontFamily: outfit, fontWeight: 700, fontSize: 16, color: C.ink,
+                        <span aria-live="polite" style={{ fontFamily: outfit, fontWeight: 700, fontSize: 16, color: C.ink,
                           minWidth: 20, textAlign: "center" }}>
                           {seatCount}
                         </span>
-                        <button onClick={() => setSeatCount(Math.min(freeSeats, seatCount + 1))}
+                        <button
+                          onClick={() => setSeatCount(Math.min(freeSeats, seatCount + 1))}
+                          aria-label="Aumentar número de assentos"
                           style={{ width: 34, height: 34, borderRadius: 10, border: `1.5px solid ${C.border}`,
                             background: C.bg, fontFamily: outfit, fontWeight: 700, fontSize: 18, color: C.ink,
                             display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>

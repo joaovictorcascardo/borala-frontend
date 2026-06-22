@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { Spinner } from '../components/Spinner';
+import { PublicProfileSkeleton } from '../components/Skeleton';
 
 function Stars({ rating }) {
   return (
@@ -46,7 +46,7 @@ export default function PublicProfilePage() {
     fetchAll();
   }, [id]);
 
-  if (loading) return <Spinner className="py-24" />;
+  if (loading) return <PublicProfileSkeleton />;
 
   const initial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
   const showImage = user?.profile_picture_url && !imgError;

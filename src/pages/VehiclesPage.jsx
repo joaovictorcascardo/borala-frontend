@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useVehicles } from "../hooks/useVehicles";
-import { Spinner } from "../components/Spinner";
+import { VehiclesSkeleton } from "../components/Skeleton";
 import { swal } from "../lib/swal";
 
 export default function VehiclesPage() {
@@ -41,7 +41,7 @@ export default function VehiclesPage() {
       </div>
 
       {loading ? (
-        <Spinner className="py-12" />
+        <VehiclesSkeleton />
       ) : vehicles.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
           <p className="text-slate-500 mb-5">Você ainda não possui veículos cadastrados.</p>

@@ -4,7 +4,7 @@ import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
-import { Spinner } from "../components/Spinner";
+import { ProfileSkeleton } from "../components/Skeleton";
 import { swal } from "../lib/swal";
 
 export default function ProfilePage() {
@@ -80,7 +80,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <Spinner />;
+  if (loading) return <ProfileSkeleton />;
 
   const initial = userData?.name?.[0]?.toUpperCase() || "?";
 

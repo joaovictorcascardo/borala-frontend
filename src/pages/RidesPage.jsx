@@ -4,7 +4,7 @@ import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import { useRides } from "../hooks/useRides";
 import { RideCard } from "../components/RideCard";
-import { Spinner } from "../components/Spinner";
+import { RideListSkeleton } from "../components/Skeleton";
 import { swal } from "../lib/swal";
 
 export default function RidesPage() {
@@ -112,7 +112,7 @@ export default function RidesPage() {
       </div>
 
       {loading ? (
-        <Spinner className="py-16" />
+        <RideListSkeleton />
       ) : rides.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
           <p className="text-slate-500">Nenhuma carona encontrada com esses filtros.</p>

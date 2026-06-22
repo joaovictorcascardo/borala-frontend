@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { Spinner } from "../components/Spinner";
+import { MyBookingsSkeleton } from "../components/Skeleton";
 import { BOOKING_STATUS_LABEL, BOOKING_STATUS_STYLE } from "../constants/status";
 import { swal } from "../lib/swal";
 
@@ -46,7 +46,13 @@ export default function MyBookingsPage() {
     }
   }
 
-  if (loading) return <Spinner className="py-24" />;
+  if (loading) {
+    return (
+      <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <MyBookingsSkeleton />
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">

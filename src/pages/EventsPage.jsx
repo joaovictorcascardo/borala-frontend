@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
-import { Spinner } from "../components/Spinner";
+import { EventsSkeleton } from "../components/Skeleton";
 
 export default function EventsPage() {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ export default function EventsPage() {
       </div>
 
       {loading ? (
-        <Spinner className="py-12" />
+        <EventsSkeleton />
       ) : events.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
           <p className="text-slate-500">Nenhum evento disponível no momento.</p>

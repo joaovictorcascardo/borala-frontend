@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { Spinner } from "../components/Spinner";
+import { EventRidesSkeleton } from "../components/Skeleton";
 
 export default function EventRidesPage() {
   const { id } = useParams();
@@ -34,7 +34,7 @@ export default function EventRidesPage() {
     loadData();
   }, [id]);
 
-  if (loading) return <Spinner className="py-24" />;
+  if (loading) return <EventRidesSkeleton />;
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">

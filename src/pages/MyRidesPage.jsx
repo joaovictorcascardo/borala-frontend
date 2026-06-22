@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { Spinner } from "../components/Spinner";
+import { MyRidesSkeleton } from "../components/Skeleton";
 import { RIDE_STATUS_LABEL, RIDE_STATUS_STYLE } from "../constants/status";
 import { swal } from "../lib/swal";
 
@@ -54,7 +54,13 @@ export default function MyRidesPage() {
     }
   }
 
-  if (loading) return <Spinner className="py-24" />;
+  if (loading) {
+    return (
+      <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <MyRidesSkeleton />
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">

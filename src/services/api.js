@@ -16,10 +16,10 @@ instance.interceptors.request.use((config) => {
 instance.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message =
-      error.response?.data?.error ||
-      error.response?.data?.message ||
-      "Ocorreu um erro inesperado na requisição.";
+    const data = error.response?.data;
+    const message = Array.isArray(data)
+      ? data.map((e) => e.message).filter(Boolean).join(", ")
+      : data?.error || data?.message || "Ocorreu um erro inesperado na requisição.";
     return Promise.reject(new Error(message));
   },
 );

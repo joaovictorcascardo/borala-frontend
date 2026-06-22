@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api";
+import { Spinner } from "../components/Spinner";
 import { swal } from "../lib/swal";
 
 export default function EditVehiclePage() {
@@ -18,7 +19,7 @@ export default function EditVehiclePage() {
   useEffect(() => {
     async function loadVehicle() {
       try {
-        const response = await api("/vehicles");
+        const response = await api.get("/vehicles");
         const vehicle = response.find((v) => String(v.id) === String(id));
         if (!vehicle) {
           navigate("/vehicles");
@@ -43,9 +44,12 @@ export default function EditVehiclePage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api(`/vehicles/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ brand, model, color, year: Number(year), seats: Number(seats) }),
+      await api.put(`/vehicles/${id}`, {
+        brand,
+        model,
+        color,
+        year: Number(year),
+        seats: Number(seats),
       });
       swal.success("Sucesso!", "Veículo atualizado com sucesso.");
       navigate("/vehicles");
@@ -56,13 +60,7 @@ export default function EditVehiclePage() {
     }
   }
 
-  if (pageLoading) {
-    return (
-      <div className="flex justify-center py-24">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (pageLoading) return <Spinner />;
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">

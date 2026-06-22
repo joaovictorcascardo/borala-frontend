@@ -1,38 +1,20 @@
-import { useState, useEffect } from "react";
-import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { useVehicles } from "../hooks/useVehicles";
+import { Spinner } from "../components/Spinner";
 import { swal } from "../lib/swal";
 
 export default function VehiclesPage() {
   const navigate = useNavigate();
-  const [vehicles, setVehicles] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadVehicles() {
-      try {
-        const response = await api("/vehicles");
-        setVehicles(response);
-      } catch (error) {
-        if (error.message?.includes("não possui nenhum veículo")) {
-          setVehicles([]);
-        } else {
-          swal.error("Erro", "Não foi possível carregar os veículos.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadVehicles();
-  }, []);
+  const { vehicles, loading, reload } = useVehicles();
 
   async function handleDelete(id) {
     const result = await swal.confirm("Tem certeza?", "Esta ação não pode ser desfeita!");
     if (result.isConfirmed) {
       try {
-        await api(`/vehicles/${id}`, { method: "DELETE" });
+        await api.delete(`/vehicles/${id}`);
         swal.success("Sucesso!", "Veículo removido.");
-        setVehicles((prev) => prev.filter((v) => v.id !== id));
+        reload();
       } catch {
         swal.error("Erro", "Não foi possível remover o veículo.");
       }
@@ -59,9 +41,7 @@ export default function VehiclesPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <Spinner className="py-12" />
       ) : vehicles.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
           <p className="text-slate-500 mb-5">Você ainda não possui veículos cadastrados.</p>

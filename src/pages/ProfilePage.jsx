@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { useAuth } from "../hooks/useAuth";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { Spinner } from "../components/Spinner";
 import { swal } from "../lib/swal";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
   const [userData, setUserData] = useState(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -20,14 +23,14 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await api("/users/me");
+        const response = await api.get("/users/me");
         setUserData(response);
         setName(response.name || "");
         setPhone(response.phone ? String(response.phone) : "");
         setBio(response.bio || "");
         setAvatarUrl(response.profile_picture_url || null);
 
-        const rev = await api(`/users/${response.id}/reviews?page=1&limit=20`).catch(() => []);
+        const rev = await api.get(`/users/${response.id}/reviews?page=1&limit=20`).catch(() => []);
         setReviews(Array.isArray(rev) ? rev : []);
       } catch {
         await swal.error("Não foi possível carregar os dados do perfil.", "Erro ao carregar");
@@ -48,18 +51,9 @@ export default function ProfilePage() {
     setUploadingAvatar(true);
 
     try {
-      const token = localStorage.getItem("@Borala:token");
-      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3333";
-      const response = await fetch(`${baseURL}/users/me/avatar`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+      const updated = await api.patch("/users/me/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Erro ao enviar avatar.");
-      }
-      const updated = await response.json();
       setAvatarUrl(updated.profile_picture_url);
       swal.successToast("Avatar atualizado com sucesso!");
     } catch (err) {
@@ -73,12 +67,13 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const updated = await api("/users/me", {
-        method: "PUT",
-        body: JSON.stringify({ name, phone: Number(phone), bio: bio || null }),
+      const updated = await api.put("/users/me", {
+        name,
+        phone: Number(phone),
+        bio: bio || null,
       });
       setUserData(updated);
-      localStorage.setItem("@Borala:user", JSON.stringify(updated));
+      updateUser(updated);
       swal.successToast("Perfil atualizado com sucesso!");
     } catch (err) {
       swal.error(err.message || "Erro ao atualizar perfil.");
@@ -87,13 +82,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-24">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <Spinner />;
 
   const initial = userData?.name?.[0]?.toUpperCase() || "?";
 

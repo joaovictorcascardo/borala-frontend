@@ -16,11 +16,6 @@ export default function VehicleFormPage() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!brand || !model || !color || !licensePlate || !year || !seats) {
-      swal.error("Erro", "Por favor, preencha todos os campos.");
-      return;
-    }
-
     const currentYear = new Date().getFullYear();
     if (Number(year) < 1950 || Number(year) > currentYear + 1) {
       swal.error("Erro", "Por favor, insira um ano válido.");
@@ -34,16 +29,13 @@ export default function VehicleFormPage() {
 
     setLoading(true);
     try {
-      await api("/vehicles", {
-        method: "POST",
-        body: JSON.stringify({
-          brand,
-          model,
-          color,
-          license_plate: licensePlate.toUpperCase(),
-          year: Number(year),
-          seats: Number(seats),
-        }),
+      await api.post("/vehicles", {
+        brand,
+        model,
+        color,
+        license_plate: licensePlate.toUpperCase(),
+        year: Number(year),
+        seats: Number(seats),
       });
       swal.success("Sucesso!", "Veículo adicionado com sucesso.");
       navigate("/vehicles");

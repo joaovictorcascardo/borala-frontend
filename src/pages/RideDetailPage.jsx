@@ -500,7 +500,7 @@ export default function RideDetailPage() {
                   background: `linear-gradient(to bottom, ${C.blue}, ${C.bgCool})`, borderRadius: 2 }} />
                 <TimelineStop type="start" time={depTimeStr} name={originShort} sub={ride.origin_address} />
                 <TimelineStop type="end"
-                  time={(() => { const d = new Date(depDate); d.setMinutes(d.getMinutes() + 80);
+                  time={(() => { const d = new Date(depDate); d.setMinutes(d.getMinutes() + (metrics?.duration_minutes || 80));
                     return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); })()}
                   name={destShort} sub={ride.destination_address} />
               </div>
@@ -571,7 +571,7 @@ export default function RideDetailPage() {
               </div>
             )}
 
-            {!isDriver && activeMyBooking && bStatus === "CONFIRMED" && (
+            {!isDriver && activeMyBooking && bStatus === "CONFIRMED" && isCompleted && (
               <ReviewSection
                 rideId={id}
                 revieweeId={ride.driver_id}

@@ -1,19 +1,18 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import { swal } from "../lib/swal";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const userData = (() => {
-    try { return JSON.parse(localStorage.getItem("@Borala:user")); } catch { return null; }
-  })();
-  const initial = userData?.name?.[0]?.toUpperCase() || "?";
-  const firstName = userData?.name?.split(" ")[0] || "";
+  const { user, logout } = useAuth();
+
+  const initial = user?.name?.[0]?.toUpperCase() || "?";
+  const firstName = user?.name?.split(" ")[0] || "";
 
   const handleLogout = async () => {
     const { isConfirmed } = await swal.confirm("Sair da conta?", "Você será redirecionado para o login.", { confirmText: "Sair" });
     if (!isConfirmed) return;
-    localStorage.removeItem("@Borala:user");
-    localStorage.removeItem("@Borala:token");
+    logout();
     navigate("/login");
   };
 

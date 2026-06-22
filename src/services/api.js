@@ -1,38 +1,27 @@
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3333";
+import axios from "axios";
 
-export async function api(endpoint, options = {}) {
+const instance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3333",
+  headers: { "Content-Type": "application/json" },
+});
+
+instance.interceptors.request.use((config) => {
   const token = localStorage.getItem("@Borala:token");
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
-
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
+});
 
-  const response = await fetch(`${baseURL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+instance.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    const message =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      "Ocorreu um erro inesperado na requisição.";
+    return Promise.reject(new Error(message));
+  },
+);
 
-  if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch (err) {
-      errorData = { error: "Ocorreu um erro inesperado na requisição." };
-    }
-
-    throw new Error(
-      errorData.error || errorData.message || "Erro na requisição",
-    );
-  }
-
-  if (response.status === 204) {
-    return null;
-  }
-
-  return response.json();
-}
+export const api = instance;

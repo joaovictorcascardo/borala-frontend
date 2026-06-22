@@ -401,7 +401,7 @@ export default function RideDetailPage() {
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: jakarta }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px" }}>
+      <div className="ride-detail-outer" style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px" }}>
 
         <nav aria-label="Navegação" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13.5,
           color: C.faint, fontFamily: jakarta, marginBottom: 24, flexWrap: "wrap" }}>
@@ -414,7 +414,7 @@ export default function RideDetailPage() {
 
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12, flexWrap: "wrap" }}>
-            <h1 style={{ fontFamily: outfit, fontWeight: 800, fontSize: 34, color: C.ink,
+            <h1 className="ride-detail-title" style={{ fontFamily: outfit, fontWeight: 800, fontSize: 34, color: C.ink,
               letterSpacing: "-0.02em", margin: 0 }}>
               {originShort} → {destShort}
             </h1>
@@ -450,6 +450,10 @@ export default function RideDetailPage() {
             @media (max-width: 960px) {
               .ride-detail-grid { grid-template-columns: 1fr !important; }
               .ride-detail-sidebar { position: static !important; }
+            }
+            @media (max-width: 640px) {
+              .ride-detail-outer { padding: 16px 16px 48px !important; }
+              .ride-detail-title { font-size: 22px !important; letter-spacing: -0.01em !important; }
             }
           `}</style>
 

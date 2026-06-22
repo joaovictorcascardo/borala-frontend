@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { useAuth } from "../hooks/useAuth";
+import { Spinner } from "../components/Spinner";
 import { swal } from "../lib/swal";
 
 const C = {
@@ -186,13 +188,10 @@ function ReviewSection({ rideId, revieweeId, revieweeName }) {
     if (!rating) { swal.error("Selecione uma nota de 1 a 5 estrelas."); return; }
     setLoading(true);
     try {
-      await api(`/rides/${rideId}/reviews`, {
-        method: "POST",
-        body: JSON.stringify({
-          reviewee_id: Number(revieweeId),
-          rating,
-          ...(comment.trim() && { comment: comment.trim() }),
-        }),
+      await api.post(`/rides/${rideId}/reviews`, {
+        reviewee_id: Number(revieweeId),
+        rating,
+        ...(comment.trim() && { comment: comment.trim() }),
       });
       setSubmitted(true);
       swal.successToast("Avaliação enviada com sucesso!");
@@ -292,21 +291,19 @@ export default function RideDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [seatCount, setSeatCount] = useState(1);
 
-  const currentUser = (() => {
-    try { return JSON.parse(localStorage.getItem("@Borala:user")); } catch { return null; }
-  })();
+  const { user: currentUser } = useAuth();
 
   async function loadAll() {
     try {
-      const rideData = await api(`/rides/${id}`);
+      const rideData = await api.get(`/rides/${id}`);
       setRide(rideData);
       const userIsDriver = currentUser?.id === rideData.driver_id;
 
       const [driverData, bookingsData, rideBookingsData, metricsData] = await Promise.all([
-        rideData.driver_id ? api(`/users/${rideData.driver_id}`).catch(() => null) : Promise.resolve(null),
-        userIsDriver ? Promise.resolve([]) : api("/bookings/me").catch(() => []),
-        userIsDriver ? api(`/rides/${id}/bookings`).catch(() => []) : Promise.resolve([]),
-        api(`/rides/${id}/metrics`).catch(() => null),
+        rideData.driver_id ? api.get(`/users/${rideData.driver_id}`).catch(() => null) : Promise.resolve(null),
+        userIsDriver ? Promise.resolve([]) : api.get("/bookings/me").catch(() => []),
+        userIsDriver ? api.get(`/rides/${id}/bookings`).catch(() => []) : Promise.resolve([]),
+        api.get(`/rides/${id}/metrics`).catch(() => null),
       ]);
       setMetrics(metricsData);
 
@@ -334,10 +331,7 @@ export default function RideDetailPage() {
     if (!isConfirmed) return;
     setActionLoading(true);
     try {
-      await api(`/bookings/${bookingId}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: newStatus }),
-      });
+      await api.patch(`/bookings/${bookingId}`, { status: newStatus });
       await loadAll();
       swal.successToast(newStatus === "CONFIRMED" ? "Passageiro confirmado!" : "Solicitação recusada.");
     } catch (err) {
@@ -360,10 +354,7 @@ export default function RideDetailPage() {
     if (!isConfirmed) return;
     setActionLoading(true);
     try {
-      await api(`/rides/${id}/bookings`, {
-        method: "POST",
-        body: JSON.stringify({ seats_booked: seatCount }),
-      });
+      await api.post(`/rides/${id}/bookings`, { seats_booked: seatCount });
       await loadAll();
       swal.successToast(ride.automatic_approval ? "Vaga reservada com sucesso!" : "Solicitação enviada!");
     } catch (err) {
@@ -380,10 +371,7 @@ export default function RideDetailPage() {
     if (!isConfirmed) return;
     setActionLoading(true);
     try {
-      await api(`/bookings/${bookingId}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "CANCELLED" }),
-      });
+      await api.patch(`/bookings/${bookingId}`, { status: "CANCELLED" });
       await loadAll();
       swal.successToast("Reserva cancelada.");
     } catch (err) {
@@ -403,10 +391,7 @@ export default function RideDetailPage() {
     const statusMap = { active: "IN_PROGRESS", completed: "COMPLETED", cancelled: "CANCELLED" };
     setActionLoading(true);
     try {
-      await api(`/rides/${id}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: statusMap[status] }),
-      });
+      await api.patch(`/rides/${id}/status`, { status: statusMap[status] });
       await loadAll();
       swal.successToast("Status atualizado!");
     } catch (err) {
@@ -416,14 +401,7 @@ export default function RideDetailPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center",
-        justifyContent: "center", background: C.bg }}>
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <Spinner className="py-24" />;
 
   if (!ride) {
     return (
@@ -535,10 +513,8 @@ export default function RideDetailPage() {
             }
           `}</style>
 
-          {/* COLUNA ESQUERDA */}
           <div style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 0 }}>
 
-            {/* Mapa */}
             <div style={{ borderRadius: 20, border: `1px solid ${C.border}`, overflow: "hidden",
               height: 320, background: "#E7EEF8", position: "relative" }}>
               <RideMap origin={ride.origin_address} />
@@ -553,7 +529,6 @@ export default function RideDetailPage() {
               </div>
             </div>
 
-            {/* Métricas */}
             <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`,
               padding: "20px 24px", display: "flex", gap: 0 }}>
               {[
@@ -582,7 +557,6 @@ export default function RideDetailPage() {
               ))}
             </div>
 
-            {/* Trajeto */}
             <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                 <span style={{ fontFamily: outfit, fontWeight: 700, fontSize: 19, color: C.ink }}>Trajeto</span>
@@ -598,7 +572,6 @@ export default function RideDetailPage() {
               </div>
             </div>
 
-            {/* Info motorista */}
             {driverInfo && (
               <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -664,7 +637,6 @@ export default function RideDetailPage() {
               </div>
             )}
 
-            {/* Seção de avaliação — passageiro confirma após carona concluída */}
             {!isDriver && activeMyBooking && bStatus === "CONFIRMED" && (
               <ReviewSection
                 rideId={id}
@@ -675,11 +647,9 @@ export default function RideDetailPage() {
 
           </div>
 
-          {/* SIDEBAR */}
           <div className="ride-detail-sidebar"
             style={{ position: "sticky", top: 96, display: "flex", flexDirection: "column", gap: 16 }}>
 
-            {/* Card de reserva */}
             <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`,
               padding: "24px", boxShadow: "0 4px 24px rgba(14,27,61,0.07)" }}>
 
@@ -693,7 +663,6 @@ export default function RideDetailPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-                {/* Seletor de assentos */}
                 {canBook && (
                   <div style={{ borderRadius: 12, border: `1.5px solid ${C.border}`, padding: "12px 14px" }}>
                     <div style={{ fontFamily: jakarta, fontSize: 12, fontWeight: 600, color: C.faint,
@@ -728,7 +697,6 @@ export default function RideDetailPage() {
                   </div>
                 )}
 
-                {/* Ponto de embarque */}
                 <div style={{ borderRadius: 12, border: `1.5px solid ${C.border}`, padding: "12px 14px" }}>
                   <div style={{ fontFamily: jakarta, fontSize: 12, fontWeight: 600, color: C.faint,
                     marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -742,7 +710,6 @@ export default function RideDetailPage() {
                 </div>
               </div>
 
-              {/* Botão solicitar vaga */}
               {canBook && (
                 <button onClick={handleBook} disabled={actionLoading}
                   style={{ width: "100%", height: 48, borderRadius: 12, background: C.blue,
@@ -753,7 +720,6 @@ export default function RideDetailPage() {
                 </button>
               )}
 
-              {/* Status do meu booking */}
               {activeMyBooking && !isDriver && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ borderRadius: 12, padding: "12px 14px",
@@ -778,7 +744,6 @@ export default function RideDetailPage() {
                 </div>
               )}
 
-              {/* Vagas esgotadas */}
               {!canBook && !activeMyBooking && !isDriver && isPending && freeSeats === 0 && (
                 <div style={{ textAlign: "center", padding: "12px 0", fontFamily: jakarta,
                   fontSize: 14, color: C.faint }}>
@@ -800,7 +765,6 @@ export default function RideDetailPage() {
               </div>
             </div>
 
-            {/* Aprovação automática */}
             {ride.automatic_approval && isPending && (
               <div style={{ background: C.bgCool, borderRadius: 16, border: `1px solid #BFDBFE`,
                 padding: "14px 18px", display: "flex", alignItems: "center", gap: 10 }}>
@@ -811,7 +775,6 @@ export default function RideDetailPage() {
               </div>
             )}
 
-            {/* Painel do motorista */}
             {isDriver && !isCompleted && !isCancelled && (
               <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
                 <div style={{ fontFamily: outfit, fontWeight: 700, fontSize: 16, color: C.navy, marginBottom: 16 }}>
@@ -845,7 +808,6 @@ export default function RideDetailPage() {
               </div>
             )}
 
-            {/* Solicitações de passageiros — só motorista vê */}
             {isDriver && rideBookings.length > 0 && (
               <div style={{ background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`, padding: "24px" }}>
                 <div style={{ fontFamily: outfit, fontWeight: 700, fontSize: 16, color: C.navy, marginBottom: 16 }}>

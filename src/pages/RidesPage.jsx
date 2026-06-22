@@ -1,42 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { useAuth } from "../hooks/useAuth";
+import { useRides } from "../hooks/useRides";
+import { RideCard } from "../components/RideCard";
+import { Spinner } from "../components/Spinner";
 import { swal } from "../lib/swal";
-
-const STATUS_LABEL = {
-  SCHEDULED: "Agendada",
-  IN_PROGRESS: "Em andamento",
-  COMPLETED: "Concluída",
-  CANCELLED: "Cancelada",
-  pending: "Agendada",
-  active: "Em andamento",
-  completed: "Concluída",
-  cancelled: "Cancelada",
-};
-
-const STATUS_STYLE = {
-  SCHEDULED: "text-amber-600 bg-amber-50 border-amber-200",
-  IN_PROGRESS: "text-blue-600 bg-blue-50 border-blue-200",
-  COMPLETED: "text-emerald-600 bg-emerald-50 border-emerald-200",
-  CANCELLED: "text-red-500 bg-red-50 border-red-200",
-  pending: "text-amber-600 bg-amber-50 border-amber-200",
-  active: "text-blue-600 bg-blue-50 border-blue-200",
-  completed: "text-emerald-600 bg-emerald-50 border-emerald-200",
-  cancelled: "text-red-500 bg-red-50 border-red-200",
-};
 
 export default function RidesPage() {
   const navigate = useNavigate();
-  const [rides, setRides] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
   const [maxCost, setMaxCost] = useState("");
-
-  const currentUser = (() => {
-    try { return JSON.parse(localStorage.getItem("@Borala:user")); } catch { return null; }
-  })();
+  const { rides, loading, reload } = useRides();
 
   async function handleBookRide(e, rideId) {
     e.stopPropagation();
@@ -49,43 +27,17 @@ export default function RidesPage() {
     if (!isConfirmed) return;
 
     try {
-      await api(`/rides/${rideId}/bookings`, {
-        method: "POST",
-        body: JSON.stringify({ seats_booked: 1 })
-      });
+      await api.post(`/rides/${rideId}/bookings`, { seats_booked: 1 });
       swal.successToast("Solicitação enviada com sucesso!");
-      fetchRides({ origin, destination, date, maxCost });
+      reload({ origin, destination, date, maxCost });
     } catch (error) {
       swal.error(error.message || "Erro ao solicitar vaga.");
     }
   }
 
-  async function fetchRides(filters = {}) {
-    setLoading(true);
-    try {
-      const qs = new URLSearchParams();
-      qs.set("limit", "100"); // Define um limite alto para trazer todas as caronas
-      if (filters.origin) qs.set("origin", filters.origin);
-      if (filters.destination) qs.set("destination", filters.destination);
-      if (filters.date) qs.set("date", filters.date);
-      if (filters.maxCost) qs.set("max_cost", filters.maxCost);
-      const query = qs.toString() ? `?${qs.toString()}` : "";
-      const data = await api(`/rides${query}`);
-      setRides(Array.isArray(data) ? data : []);
-    } catch {
-      setRides([]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchRides();
-  }, []);
-
   function handleFilter(e) {
     e.preventDefault();
-    fetchRides({ origin, destination, date, maxCost });
+    reload({ origin, destination, date, maxCost });
   }
 
   function handleClear() {
@@ -93,7 +45,7 @@ export default function RidesPage() {
     setDestination("");
     setDate("");
     setMaxCost("");
-    fetchRides();
+    reload({});
   }
 
   return (
@@ -160,57 +112,26 @@ export default function RidesPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <Spinner className="py-16" />
       ) : rides.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
           <p className="text-slate-500">Nenhuma carona encontrada com esses filtros.</p>
         </div>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
-          {rides.map((ride, i) => {
-            const isDriver = currentUser && ride.driver_id && String(currentUser.id) === String(ride.driver_id);
+          {rides.map((ride) => {
+            const isDriver = user && ride.driver_id && String(user.id) === String(ride.driver_id);
             return (
-              <li
-                key={ride.id ?? i}
-                onClick={() => navigate(`/rides/${ride.id}`)}
-                className="rounded-2xl border border-blue-100 bg-white p-5 shadow-[0_2px_8px_rgba(37,99,235,0.06)] hover:border-blue-200 hover:shadow-[0_4px_20px_rgba(37,99,235,0.10)] transition-all duration-200 cursor-pointer"
-              >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <p className="font-bold text-slate-900 text-sm leading-snug">{ride.origin_address}</p>
-                  {ride.status && (
-                    <span className={`shrink-0 text-xs font-semibold border rounded-full px-2.5 py-0.5 ${STATUS_STYLE[ride.status] ?? "text-slate-600 bg-slate-50 border-slate-200"}`}>
-                      {STATUS_LABEL[ride.status] ?? ride.status}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-slate-500 mb-3">→ {ride.destination_address}</p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-3 py-1">
-                    {new Date(ride.departure_time).toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-full px-3 py-1">
-                    {ride.available_seats} vaga{ride.available_seats !== 1 ? "s" : ""}
-                  </span>
-                  {ride.estimated_total_cost && (
-                    <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
-                      R$ {Number(ride.estimated_total_cost).toFixed(2)}
-                    </span>
-                  )}
-                </div>
-
+              <RideCard key={ride.id} ride={ride}>
                 {!isDriver && ride.available_seats > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-100">
-                    <button
-                      onClick={(e) => handleBookRide(e, ride.id)}
-                      className="inline-flex items-center justify-center rounded-xl border border-blue-200 px-4 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
-                    >
-                      Solicitar Vaga
-                    </button>
-                  </div>
+                  <button
+                    onClick={(e) => handleBookRide(e, ride.id)}
+                    className="inline-flex items-center justify-center rounded-xl border border-blue-200 px-4 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
+                  >
+                    Solicitar Vaga
+                  </button>
                 )}
-              </li>
+              </RideCard>
             );
           })}
         </ul>

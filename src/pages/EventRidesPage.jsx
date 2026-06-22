@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { Spinner } from "../components/Spinner";
 
 export default function EventRidesPage() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export default function EventRidesPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const eventData = await api(`/events/${id}`);
+        const eventData = await api.get(`/events/${id}`);
         setEvent(eventData);
       } catch {
         setError("Não foi possível carregar o evento.");
@@ -22,7 +23,7 @@ export default function EventRidesPage() {
       }
 
       try {
-        const ridesData = await api(`/events/${id}/rides`);
+        const ridesData = await api.get(`/events/${id}/rides`);
         setRides(Array.isArray(ridesData) ? ridesData : []);
       } catch {
         setRides([]);
@@ -33,13 +34,7 @@ export default function EventRidesPage() {
     loadData();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-24">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <Spinner className="py-24" />;
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">

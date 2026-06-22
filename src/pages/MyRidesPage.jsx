@@ -1,29 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { Spinner } from "../components/Spinner";
+import { RIDE_STATUS_LABEL, RIDE_STATUS_STYLE } from "../constants/status";
 import { swal } from "../lib/swal";
-
-const STATUS_LABEL = {
-  SCHEDULED: "Agendada",
-  IN_PROGRESS: "Em andamento",
-  COMPLETED: "Concluída",
-  CANCELLED: "Cancelada",
-  pending: "Agendada",
-  active: "Em andamento",
-  completed: "Concluída",
-  cancelled: "Cancelada",
-};
-
-const STATUS_STYLE = {
-  SCHEDULED: "text-amber-600 bg-amber-50 border-amber-200",
-  IN_PROGRESS: "text-blue-600 bg-blue-50 border-blue-200",
-  COMPLETED: "text-emerald-600 bg-emerald-50 border-emerald-200",
-  CANCELLED: "text-red-500 bg-red-50 border-red-200",
-  pending: "text-amber-600 bg-amber-50 border-amber-200",
-  active: "text-blue-600 bg-blue-50 border-blue-200",
-  completed: "text-emerald-600 bg-emerald-50 border-emerald-200",
-  cancelled: "text-red-500 bg-red-50 border-red-200",
-};
 
 export default function MyRidesPage() {
   const navigate = useNavigate();
@@ -33,7 +13,7 @@ export default function MyRidesPage() {
 
   async function loadRides() {
     try {
-      const data = await api("/users/me/rides");
+      const data = await api.get("/users/me/rides");
       setRides(Array.isArray(data) ? data : []);
     } catch {
       setRides([]);
@@ -64,10 +44,7 @@ export default function MyRidesPage() {
 
     setUpdatingId(rideId);
     try {
-      await api(`/rides/${rideId}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: apiStatus }),
-      });
+      await api.patch(`/rides/${rideId}/status`, { status: apiStatus });
       await loadRides();
       swal.successToast("Status atualizado!");
     } catch (error) {
@@ -77,13 +54,7 @@ export default function MyRidesPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-24">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <Spinner className="py-24" />;
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -120,8 +91,8 @@ export default function MyRidesPage() {
                     <p className="text-sm text-slate-500 mt-0.5">→ {ride.destination_address}</p>
                   </div>
                   {ride.status && (
-                    <span className={`shrink-0 text-xs font-semibold border rounded-full px-2.5 py-0.5 ${STATUS_STYLE[ride.status] ?? "text-slate-600 bg-slate-50 border-slate-200"}`}>
-                      {STATUS_LABEL[ride.status] ?? ride.status}
+                    <span className={`shrink-0 text-xs font-semibold border rounded-full px-2.5 py-0.5 ${RIDE_STATUS_STYLE[ride.status] ?? "text-slate-600 bg-slate-50 border-slate-200"}`}>
+                      {RIDE_STATUS_LABEL[ride.status] ?? ride.status}
                     </span>
                   )}
                 </div>

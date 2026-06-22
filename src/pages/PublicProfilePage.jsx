@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { Spinner } from '../components/Spinner';
 
 function Stars({ rating }) {
   return (
@@ -25,7 +26,7 @@ export default function PublicProfilePage() {
     setImgError(false);
     const fetchAll = async () => {
       try {
-        const userData = await api(`/users/${id}`);
+        const userData = await api.get(`/users/${id}`);
         setUser(userData);
       } catch {
         setError("Não foi possível carregar o perfil deste usuário.");
@@ -34,7 +35,7 @@ export default function PublicProfilePage() {
       }
 
       try {
-        const reviewData = await api(`/users/${id}/reviews`);
+        const reviewData = await api.get(`/users/${id}/reviews`);
         setReviews(Array.isArray(reviewData) ? reviewData : []);
       } catch {
         setReviews([]);
@@ -45,13 +46,7 @@ export default function PublicProfilePage() {
     fetchAll();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-24">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <Spinner className="py-24" />;
 
   const initial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
   const showImage = user?.profile_picture_url && !imgError;

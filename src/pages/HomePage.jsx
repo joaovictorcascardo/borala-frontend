@@ -1,27 +1,11 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../services/api";
+import { useAuth } from "../hooks/useAuth";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("@Borala:user")); } catch { return null; }
-  });
+  const { user } = useAuth();
 
-  useEffect(() => {
-    api("/users/me")
-      .then((data) => {
-        setUserData(data);
-        localStorage.setItem("@Borala:user", JSON.stringify(data));
-      })
-      .catch(() => {
-        localStorage.removeItem("@Borala:token");
-        localStorage.removeItem("@Borala:user");
-        navigate("/login");
-      });
-  }, [navigate]);
-
-  const firstName = userData?.name?.split(" ")[0] || "Viajante";
+  const firstName = user?.name?.split(" ")[0] || "Viajante";
 
   const features = [
     {

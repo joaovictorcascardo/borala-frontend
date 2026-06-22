@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { Spinner } from "../components/Spinner";
 
 export default function EventsPage() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function EventsPage() {
   useEffect(() => {
     async function loadEvents() {
       try {
-        const response = await api("/events");
+        const response = await api.get("/events");
         setEvents(Array.isArray(response) ? response : []);
       } catch {
         setEvents([]);
@@ -34,9 +35,7 @@ export default function EventsPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <Spinner className="py-12" />
       ) : events.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-12 text-center">
           <p className="text-slate-500">Nenhum evento disponível no momento.</p>

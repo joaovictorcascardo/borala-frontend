@@ -51,9 +51,7 @@ export default function ProfilePage() {
     setUploadingAvatar(true);
 
     try {
-      const updated = await api.patch("/users/me/avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const updated = await api.patch("/users/me/avatar", formData);
       setAvatarUrl(updated.profile_picture_url);
       swal.successToast("Avatar atualizado com sucesso!");
     } catch (err) {

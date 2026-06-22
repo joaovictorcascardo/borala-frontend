@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import { Spinner } from "../components/Spinner";
+import { RideRouteMap } from "../components/RideRouteMap";
 import { swal } from "../lib/swal";
 
 const C = {
@@ -51,73 +52,6 @@ const ICONS = {
   check: "M20 6L9 17l-5-5",
 };
 
-function RideMap({ origin }) {
-  return (
-    <svg viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg"
-      style={{ width: "100%", height: "100%", display: "block" }}>
-      <rect width="640" height="320" fill="#E7EEF8" />
-      <rect x="0" y="52" width="640" height="13" fill="#D2DEEF" />
-      <rect x="0" y="102" width="640" height="8" fill="#D2DEEF" />
-      <rect x="0" y="150" width="640" height="13" fill="#D2DEEF" />
-      <rect x="0" y="200" width="640" height="8" fill="#D2DEEF" />
-      <rect x="0" y="248" width="640" height="13" fill="#D2DEEF" />
-      <rect x="78" y="0" width="9" height="320" fill="#D2DEEF" />
-      <rect x="158" y="0" width="6" height="320" fill="#D2DEEF" />
-      <rect x="248" y="0" width="9" height="320" fill="#D2DEEF" />
-      <rect x="338" y="0" width="6" height="320" fill="#D2DEEF" />
-      <rect x="438" y="0" width="9" height="320" fill="#D2DEEF" />
-      <rect x="538" y="0" width="6" height="320" fill="#D2DEEF" />
-      <rect x="88" y="65" width="62" height="80" rx="4" fill="#DCE6F4" />
-      <rect x="168" y="65" width="72" height="28" rx="4" fill="#DCE6F4" />
-      <rect x="168" y="112" width="72" height="33" rx="4" fill="#DCE6F4" />
-      <rect x="258" y="65" width="72" height="80" rx="4" fill="#DCE6F4" />
-      <rect x="88" y="163" width="62" height="30" rx="4" fill="#DCE6F4" />
-      <rect x="88" y="212" width="62" height="30" rx="4" fill="#DCE6F4" />
-      <rect x="168" y="163" width="72" height="80" rx="4" fill="#DCE6F4" />
-      <rect x="348" y="18" width="82" height="28" rx="4" fill="#DCE6F4" />
-      <rect x="448" y="18" width="82" height="28" rx="4" fill="#DCE6F4" />
-      <rect x="348" y="65" width="82" height="80" rx="4" fill="#DCE6F4" />
-      <rect x="448" y="65" width="82" height="38" rx="4" fill="#DCE6F4" />
-      <rect x="448" y="112" width="82" height="33" rx="4" fill="#DCE6F4" />
-      <rect x="258" y="163" width="172" height="30" rx="4" fill="#DCE6F4" />
-      <rect x="348" y="212" width="82" height="30" rx="4" fill="#DCE6F4" />
-      <rect x="548" y="65" width="84" height="80" rx="4" fill="#DCE6F4" />
-      <rect x="548" y="163" width="84" height="80" rx="4" fill="#DCE6F4" />
-      <defs>
-        <linearGradient id="rg" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#46A6EE" />
-          <stop offset="100%" stopColor="#1E50E0" />
-        </linearGradient>
-        <filter id="ps">
-          <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="rgba(30,80,224,0.45)" />
-        </filter>
-        <filter id="cs">
-          <feDropShadow dx="0" dy="2" stdDeviation="5" floodColor="rgba(0,0,0,0.13)" />
-        </filter>
-      </defs>
-      <path d="M 96 288 C 180 250, 280 190, 400 118 C 460 82, 505 52, 555 26"
-        stroke="url(#rg)" strokeWidth="6" fill="none" strokeLinecap="round" />
-      <circle cx="96" cy="288" r="13" fill="white" stroke="#1E50E0" strokeWidth="3" />
-      <circle cx="96" cy="288" r="5" fill="#1E50E0" />
-      <g filter="url(#ps)">
-        <circle cx="555" cy="20" r="14" fill="url(#rg)" />
-        <polygon points="543,28 567,28 555,46" fill="url(#rg)" />
-        <circle cx="555" cy="20" r="7" fill="white" />
-      </g>
-      <g filter="url(#cs)">
-        <rect x="18" y="244" width="190" height="56" rx="12" fill="rgba(255,255,255,0.94)" />
-        <text x="30" y="262" fontSize="10" fill="#9AA8C0"
-          fontFamily="Plus Jakarta Sans, sans-serif" fontWeight="600" letterSpacing="1.2">
-          ORIGEM
-        </text>
-        <text x="30" y="280" fontSize="13.5" fill="#0E1B3D"
-          fontFamily="Plus Jakarta Sans, sans-serif" fontWeight="700">
-          {origin?.substring(0, 20) || "Ponto de partida"}
-        </text>
-      </g>
-    </svg>
-  );
-}
 
 function MetricCard({ icon, value, label }) {
   return (
@@ -517,8 +451,8 @@ export default function RideDetailPage() {
 
             <div style={{ borderRadius: 20, border: `1px solid ${C.border}`, overflow: "hidden",
               height: 320, background: "#E7EEF8", position: "relative" }}>
-              <RideMap origin={ride.origin_address} />
-              <div style={{ position: "absolute", bottom: 16, right: 16,
+              <RideRouteMap rideId={id} />
+              <div style={{ position: "absolute", bottom: 16, right: 16, zIndex: 1000,
                 background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)",
                 borderRadius: 12, padding: "10px 14px", boxShadow: "0 2px 12px rgba(0,0,0,0.12)" }}>
                 <div style={{ fontSize: 10.5, color: C.faint, fontWeight: 600,
